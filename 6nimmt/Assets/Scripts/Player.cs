@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Player
 {
-    public Cards Cards { get; set; }
+    public Cards cards;
     public string Name { get; set; }
     public int Score { get; set; }
     public List<Card> CardsInHand { get; set; }
@@ -42,6 +42,10 @@ public class Player
     }
     public void UpdateScore()
     {
+        if(_cardsTaken.Count == 0) 
+        {
+            return;
+        }
         foreach (var card in _cardsTaken)
         {
             Score += card.AmountTriangles;
@@ -56,16 +60,16 @@ public class Player
             GameObject.Destroy(cardObject);
         }
     }
-}
+
 
     public void AddCardToHand(Card card)
     {
         CardsInHand.Add(card);
     }
 
-    private void SetCardTexture(int randomNumber, GameObject cardObject)
+    private void SetCardTexture(int number, GameObject cardObject)
     {
-        Texture2D texture = Cards.cards[randomNumber];
+        Texture2D texture = cards.cards[number];
         cardObject.AddComponent<SpriteRenderer>();
         cardObject.GetComponent<SpriteRenderer>().sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         cardObject.GetComponent<SpriteRenderer>().sortingLayerName = _layerName;

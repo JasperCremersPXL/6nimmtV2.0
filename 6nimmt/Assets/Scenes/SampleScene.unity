@@ -1425,18 +1425,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 765832525}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a91d09dae09272d589a8e0d4198d7106, type: 3}
+  m_Script: {fileID: 11500000, guid: 76a1f63702ef2d2419e78c3044311b79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amountPlayers: 5
-  players: {fileID: 1319898354}
-  cardsRows: {fileID: 1058860680}
-  cards: {fileID: 11400000, guid: 4f716df8f6e2700989f6973cea703814, type: 2}
   playerArea: {fileID: 1526845946}
-  playArea: {fileID: 663238337}
-  playArea1: {fileID: 898136465}
-  playArea2: {fileID: 1179429225}
-  playArea3: {fileID: 432683611}
+  players: {fileID: 1319898354}
 --- !u!4 &765832527
 Transform:
   m_ObjectHideFlags: 0

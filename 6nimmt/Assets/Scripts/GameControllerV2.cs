@@ -9,41 +9,86 @@ namespace Assets.Scripts
 {
     public class GameControllerV2 : MonoBehaviour
     {
-        private List<Player> playerList;
+        public Cards cards;
+        public List<Player> playerList;
         public GameObject playerArea;
         public GameObject players;
         private List<Card> _deck;
         private List<Card> _roundPlayedCards;
+        private int turnCount;
+        private Player currentPlayer;
+        private int currentPlayerIndex;
+        private bool _isLayoutReady;
+        private bool _isHandDealt;
 
         private void Start()
         {
-            playerList = MainMenuController.players;
+            //playerList = MainMenuController.players;
+            playerList = new List<Player>();
+            playerList.Add(new Player("Test1"));
+            playerList.Add(new Player("Test2"));
             _deck = Deck.CreateDeck();
             _roundPlayedCards = new List<Card>();
-            GetPlayerAreaStartPositions();
-            GameLoop();
-
+            _isLayoutReady = false;
+            _isHandDealt = false;
+            
         }
 
         private void Update()
         {
-            // turnPlayer // turnChanged if (turnChanged) turnPlayer.DoTurn(); turnChanged = false;
-            if (!GameOver())
+            if (!_isLayoutReady) {
+                if (playerArea.transform.GetChild(0).GetComponent<RectTransform>().anchoredPosition.x != 0) {
+                    // get x localPosition of playerarea
+                    GetPlayerAreaStartPositions();
+                    // stop if
+                    _isLayoutReady = true;
+                }
+            }
+            else if (_isLayoutReady && !_isHandDealt) {
+                ResetRound();
+
+                // stop if
+                _isHandDealt = true;
+            }
+            else if(Input.GetKeyDown(KeyCode.N))
+            {
+                if(currentPlayerIndex == playerList.Count - 1)
+                {
+                    currentPlayerIndex = 0;
+                    turnCount++;
+                    //Kaarten aan rijen toevoegen
+                    if(turnCount == 10) {
+                        ResetRound();
+                    }
+                } else {
+                    currentPlayerIndex++;
+                    currentPlayer.isDone();
+                    currentPlayer = playerList[currentPlayerIndex%playerList.Count];
+                    currentPlayer.LoadCards();
+                }
+            } 
+        }
+
+        private void ResetRound()
+        {
+            UpdatePlayerScores();
+            if(!GameOver())
             {
                 DealPlayerCards();
-                DoRound();
-                UpdatePlayerScores();
+                turnCount = 0;
+                currentPlayerIndex = 0;
+                currentPlayer = playerList[currentPlayerIndex];
+                currentPlayer.LoadCards();
+            }
+            else 
+            {
+                EndGame();
             }
         }
 
-        private void GameLoop()
+        private void EndGame() 
         {
-            while(!GameOver())
-            {
-                DealPlayerCards();
-                DoRound();
-                UpdatePlayerScores();
-            }
+            throw new NotImplementedException();
         }
 
         public void UpdatePlayerScores()
@@ -77,7 +122,7 @@ namespace Assets.Scripts
 
         private void DoTurn(Player player)
         {
-            player.
+            throw new NotImplementedException();
         }
 
         private void DealPlayerCards()
@@ -116,6 +161,7 @@ namespace Assets.Scripts
             foreach(var player in playerList)
             {
                 player.PlayerCardPositions = startPositionsPlayerArea;
+                player.cards = cards;
             }
         }
 
