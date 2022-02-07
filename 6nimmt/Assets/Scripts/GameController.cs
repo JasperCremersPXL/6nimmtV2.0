@@ -48,6 +48,7 @@ public class GameController : MonoBehaviour
     }
     private void Start()
     {
+        Debug.Log(MainMenuController.players.Count);
         // create deck
         _deck = Deck.CreateDeck();
 
