@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -15,6 +16,7 @@ public class PopupEmptyPlayerNameController : MonoBehaviour
 
     public void OnAdvanceButtonPressed()
     {
+        MainMenuController.players = new List<Player>();
         for (int i = 0; i < inputFields.transform.childCount; i++)
         {
             var inputField = inputFields.transform.GetChild(i);

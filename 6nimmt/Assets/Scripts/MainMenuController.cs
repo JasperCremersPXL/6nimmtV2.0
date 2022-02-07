@@ -10,6 +10,7 @@ public class MainMenuController : MonoBehaviour
     [Header("Popup's")]
     public PopupEmptyPlayerNameController popupEmptyPlayerName;
     public PopupToManyPlayersController popupToManyPlayers;
+    public PopupNotEnoughPlayersController popupNotEnoughPlayers;
 
     public static List<Player> players = new List<Player>();
 
@@ -50,6 +51,11 @@ public class MainMenuController : MonoBehaviour
                 return;
             }
             players.Add(new Player(inputField.transform.Find("Text").GetComponent<Text>().text));
+        }
+        if (players.Count < 2)
+        {
+            popupNotEnoughPlayers.gameObject.SetActive(true);
+            return;
         }
         SceneManager.LoadScene(0);
     }
