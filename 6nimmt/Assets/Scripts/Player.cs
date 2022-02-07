@@ -56,6 +56,7 @@ public class Player
             GameObject.Destroy(cardObject);
         }
     }
+}
 
     public void AddCardToHand(Card card)
     {
