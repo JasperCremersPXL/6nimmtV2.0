@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,6 +7,9 @@ public class MainMenuController : MonoBehaviour
 {
     public GameObject inputFieldPrefab;
     public GameObject inputFields;
+    [Header("Popup's")]
+    public PopupEmptyPlayerNameController popupEmptyPlayerName;
+    public PopupToManyPlayersController popupToManyPlayers;
 
     public static List<Player> players = new List<Player>();
 
@@ -30,6 +32,10 @@ public class MainMenuController : MonoBehaviour
             var newInputField = GameObject.Instantiate<GameObject>(inputFieldPrefab);
             newInputField.transform.SetParent(inputFields.transform);
         }
+        else
+        {
+            popupToManyPlayers.gameObject.SetActive(true);
+        }
     }
 
     public void StartGame()
@@ -37,6 +43,12 @@ public class MainMenuController : MonoBehaviour
         for (int i = 0; i < inputFields.transform.childCount; i++)
         {
             var inputField = inputFields.transform.GetChild(i);
+            if (inputField.transform.Find("Text").GetComponent<Text>().text == "" || inputField.transform.Find("Text").GetComponent<Text>().text == string.Empty)
+            {
+                popupEmptyPlayerName.gameObject.SetActive(true);
+                popupEmptyPlayerName.SetTitle(i);
+                return;
+            }
             players.Add(new Player(inputField.transform.Find("Text").GetComponent<Text>().text));
         }
         SceneManager.LoadScene(0);
