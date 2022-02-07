@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    public int amountPlayers;
     public GameObject players;
+    public List<Player> playerList;
     public GameObject cardsRows;
     public Cards cards;
     public GameObject playerArea;
@@ -39,12 +39,8 @@ public class GameController : MonoBehaviour
         _startPositionsPlayArea1 = new List<Vector3>();
         _startPositionsPlayArea2 = new List<Vector3>();
         _startPositionsPlayArea3 = new List<Vector3>();
+        playerList = MainMenuController.players;
 
-        // check amount of players
-        if (amountPlayers > 10)
-            amountPlayers = 10;
-        if (amountPlayers < 2) 
-            amountPlayers = 2; 
     }
     private void Start()
     {
@@ -55,11 +51,11 @@ public class GameController : MonoBehaviour
         // instantiate player and pile objects
         GameObject playerObject;
         GameObject cardPilePlayer;
-        for (int i = 0; i < amountPlayers; i++)
+        for (int i = 0; i < playerList.Count; i++)
         {
             playerObject = new GameObject(string.Format("Player_{0}", i));
             playerObject.transform.parent = players.transform;
-            cardPilePlayer  = new GameObject(string.Format("CardPilePlayer_{0}", i));
+            cardPilePlayer = new GameObject(string.Format("CardPilePlayer_{0}", i));
             cardPilePlayer.transform.parent = playerObject.transform;
         }
 
