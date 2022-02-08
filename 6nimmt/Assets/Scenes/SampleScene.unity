@@ -1409,6 +1409,7 @@ GameObject:
   m_Component:
   - component: {fileID: 765832527}
   - component: {fileID: 765832526}
+  - component: {fileID: 765832528}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -1428,7 +1429,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a91d09dae09272d589a8e0d4198d7106, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amountPlayers: 5
   players: {fileID: 1319898354}
   cardsRows: {fileID: 1058860680}
   cards: {fileID: 11400000, guid: 4f716df8f6e2700989f6973cea703814, type: 2}
@@ -1451,6 +1451,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &765832528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 765832525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bec8eb77742d0944b976a966d274bd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &804261836
 PrefabInstance:
   m_ObjectHideFlags: 0
