@@ -35,7 +35,7 @@ public class Player
             Card current = CardsInHand[i];
             GameObject cardObject = new GameObject(string.Format("{0}", current.CardNumber));
             _cardObjects.Add(cardObject);
-            SetCardTexture(current.CardNumber, cardObject);
+            SetCardTexture(current.CardNumber-1, cardObject);
             cardObject.transform.localScale = new Vector3(16.5f, 16.75f, 0f);
             cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
         }

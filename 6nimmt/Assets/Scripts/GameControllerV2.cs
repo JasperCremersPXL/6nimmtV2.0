@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
     public class GameControllerV2 : MonoBehaviour
     {
+        public Text activePlayerText;
         public Cards cards;
         public List<Player> playerList;
         public GameObject playerArea;
@@ -31,7 +33,7 @@ namespace Assets.Scripts
             _roundPlayedCards = new List<Card>();
             _isLayoutReady = false;
             _isHandDealt = false;
-            
+            activePlayerText.text = playerList[0].Name;
         }
 
         private void Update()
@@ -52,7 +54,7 @@ namespace Assets.Scripts
             }
             else if(Input.GetKeyDown(KeyCode.N))
             {
-                if(currentPlayerIndex == playerList.Count - 1)
+                if(currentPlayerIndex == playerList.Count)
                 {
                     currentPlayerIndex = 0;
                     turnCount++;
@@ -65,6 +67,7 @@ namespace Assets.Scripts
                     currentPlayer.isDone();
                     currentPlayer = playerList[currentPlayerIndex%playerList.Count];
                     currentPlayer.LoadCards();
+                    activePlayerText.text = currentPlayer.Name;
                 }
             } 
         }
