@@ -10,6 +10,7 @@ namespace Assets.Scripts
 {
     public class GameControllerV2 : MonoBehaviour
     {
+        public CardGameObject cardGameObject;
         public Text activePlayerText;
         public Cards cards;
         public List<Player> playerList;
