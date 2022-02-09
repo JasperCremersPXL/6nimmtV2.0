@@ -17,7 +17,6 @@ public class Player
     private List<GameObject> _cardObjects;
 
 
-
     public Player(string name)
     {
         Name = name;
