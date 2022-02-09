@@ -7,12 +7,13 @@ using UnityEngine;
 
 public class Row
 {
+    public CardGameObject cardGameObject;
     public Cards cards;
     public List<Card> CardList { get; set; }
     public List<Vector3> PlayCardPositionsArea { get; set; }
     public int Offset { get; set; }
     private string _layerName = "Foreground";
-    private List<GameObject> _cardObjects;
+    private List<CardGameObject> _cardObjects;
 
 
     public Row(int offset, List<Vector3> playCardPositionsArea)
@@ -20,7 +21,7 @@ public class Row
         CardList = new List<Card>();
         Offset = offset;
         PlayCardPositionsArea = playCardPositionsArea;
-        _cardObjects = new List<GameObject>();
+        _cardObjects = new List<CardGameObject>();
 
     }
 
@@ -29,7 +30,8 @@ public class Row
         for (int i = 0; i < CardList.Count; i++)
         {
             Card current = CardList[i];
-            GameObject cardObject = new GameObject(string.Format("{0}", current.CardNumber));
+            CardGameObject cardObject = GameObject.Instantiate<CardGameObject>(cardGameObject);
+            cardObject.name = string.Format("{0}", current.CardNumber);
             
             SetCardTexture(current.CardNumber - 1, cardObject);
             _cardObjects.Add(cardObject);
@@ -42,10 +44,9 @@ public class Row
         CardList.Add(card);
     }
 
-    private void SetCardTexture(int number, GameObject cardObject)
+    private void SetCardTexture(int number, CardGameObject cardObject)
     {
         Texture2D texture = cards.cards[number];
-        cardObject.AddComponent<SpriteRenderer>();
         cardObject.GetComponent<SpriteRenderer>().sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         cardObject.GetComponent<SpriteRenderer>().sortingLayerName = _layerName;
     }

@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using Mirror;
 
 namespace Assets.Scripts
 {
-    public class GameControllerMirror : MonoBehaviour
+    public class GameControllerMirror : NetworkBehaviour
     {
         public CardGameObject cardGameObject;
         public Button drawCardButton;
@@ -52,6 +53,9 @@ namespace Assets.Scripts
             foreach(var player in playerList) {
                 player.cardGameObject = cardGameObject;
             }
+
+            // PlayerManager
+
         }
 
         private void Update()
@@ -68,10 +72,17 @@ namespace Assets.Scripts
                     _isLayoutReady = true;
                 }
             }
+
+            if (_isLayoutReady && _isHandDealt) {
+                drawCardButton.gameObject.SetActive(false);
+            }
         }
 
         private void DrawCards() {
             if (_isLayoutReady && !_isHandDealt) {
+                // NetworkIdentity networkIdentity = NetworkClient.connection.identity;
+                // playerManager = networkIdentity.GetComponent<GameControllerMirror>();
+                // playerManager.ResetRound();
                 ResetRound();
                 _isHandDealt = true;
             }
@@ -230,6 +241,7 @@ namespace Assets.Scripts
             foreach (var row in rows)
             {
                 row.cards = cards;
+                row.cardGameObject = cardGameObject;
             }
         }
     }
