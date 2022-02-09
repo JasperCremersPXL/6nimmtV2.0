@@ -34,16 +34,24 @@ public class Player
             Card current = CardsInHand[i];
             GameObject cardObject = new GameObject(string.Format("{0}", current.CardNumber));
             cardObject.AddComponent<ClickEvent>();
-
             cardObject.AddComponent<BoxCollider2D>();
             var boxCollider2d = cardObject.GetComponent<BoxCollider2D>();
             boxCollider2d.size = new Vector2(8f, 8f);
-            SetCardTexture(current.CardNumber-1, cardObject);
+            Debug.Log($"player card number: {current.CardNumber}");
+            SetCardTexture(current.CardNumber, cardObject);
             _cardObjects.Add(cardObject);
             cardObject.transform.localScale = new Vector3(16.5f, 16.75f, 0f);
             cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
         }
     }
+
+    public void TakeRow(Row row) 
+    {
+        _cardsTaken.AddRange(row.CardList);
+        row.CardList.Clear();
+        Debug.Log($"{Name} heeft nu {_cardsTaken.Count} kaarten geraapt");
+    }
+
     public void UpdateScore()
     {
         if(_cardsTaken.Count == 0) 
@@ -73,7 +81,7 @@ public class Player
 
     private void SetCardTexture(int number, GameObject cardObject)
     {
-        Texture2D texture = cards.cards[number];
+        Texture2D texture = cards.cards[number-1];
         cardObject.AddComponent<SpriteRenderer>();
         cardObject.GetComponent<SpriteRenderer>().sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         cardObject.GetComponent<SpriteRenderer>().sortingLayerName = _layerName;
