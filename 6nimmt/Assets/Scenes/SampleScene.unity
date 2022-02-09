@@ -1858,6 +1858,10 @@ MonoBehaviour:
   activePlayerText: {fileID: 1638679873}
   cards: {fileID: 11400000, guid: 4f716df8f6e2700989f6973cea703814, type: 2}
   playerArea: {fileID: 1526845946}
+  playArea: {fileID: 663238337}
+  playArea1: {fileID: 898136465}
+  playArea2: {fileID: 1179429225}
+  playArea3: {fileID: 432683611}
   players: {fileID: 1319898354}
   passingCanvas: {fileID: 24984976}
 --- !u!4 &765832527

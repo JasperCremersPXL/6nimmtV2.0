@@ -17,7 +17,6 @@ public class Player
     private List<GameObject> _cardObjects;
 
 
-
     public Player(string name)
     {
         Name = name;
@@ -34,8 +33,13 @@ public class Player
         {
             Card current = CardsInHand[i];
             GameObject cardObject = new GameObject(string.Format("{0}", current.CardNumber));
-            _cardObjects.Add(cardObject);
+            cardObject.AddComponent<ClickEvent>();
+
+            cardObject.AddComponent<BoxCollider2D>();
+            var boxCollider2d = cardObject.GetComponent<BoxCollider2D>();
+            boxCollider2d.size = new Vector2(8f, 8f);
             SetCardTexture(current.CardNumber-1, cardObject);
+            _cardObjects.Add(cardObject);
             cardObject.transform.localScale = new Vector3(16.5f, 16.75f, 0f);
             cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
         }
