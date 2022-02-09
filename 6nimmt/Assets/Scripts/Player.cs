@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class Player
 {
-    public Cards Cards { get; set; }
+    public Cards cards;
     public string Name { get; set; }
     public int Score { get; set; }
     public List<Card> CardsInHand { get; set; }
@@ -16,7 +16,6 @@ public class Player
     private int _playerAreaOffsetY = -570;
     private string _layerName = "Foreground";
     private List<GameObject> _cardObjects;
-
 
 
     public Player(string name)
@@ -35,8 +34,13 @@ public class Player
         {
             Card current = CardsInHand[i];
             GameObject cardObject = new GameObject(string.Format("{0}", current.CardNumber));
+            cardObject.AddComponent<ClickEvent>();
+
+            cardObject.AddComponent<BoxCollider2D>();
+            var boxCollider2d = cardObject.GetComponent<BoxCollider2D>();
+            boxCollider2d.size = new Vector2(8f, 8f);
+            SetCardTexture(current.CardNumber-1, cardObject);
             _cardObjects.Add(cardObject);
-            SetCardTexture(current.CardNumber, cardObject);
             cardObject.transform.localScale = new Vector3(16.5f, 16.75f, 0f);
             // TODO: animation
             Debug.Log("new animation");
@@ -46,6 +50,10 @@ public class Player
     }
     public void UpdateScore()
     {
+        if(_cardsTaken.Count == 0) 
+        {
+            return;
+        }
         foreach (var card in _cardsTaken)
         {
             Score += card.AmountTriangles;
@@ -66,9 +74,9 @@ public class Player
         CardsInHand.Add(card);
     }
 
-    private void SetCardTexture(int randomNumber, GameObject cardObject)
+    private void SetCardTexture(int number, GameObject cardObject)
     {
-        Texture2D texture = Cards.cards[randomNumber];
+        Texture2D texture = cards.cards[number];
         cardObject.AddComponent<SpriteRenderer>();
         cardObject.GetComponent<SpriteRenderer>().sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         cardObject.GetComponent<SpriteRenderer>().sortingLayerName = _layerName;
