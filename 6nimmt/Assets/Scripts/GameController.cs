@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
+    public CardGameObject cardPrefab; 
+    public Button drawCardButton;
     public GameObject players;
     public List<Player> playerList;
     public GameObject cardsRows;
@@ -29,6 +32,7 @@ public class GameController : MonoBehaviour
     private bool _isHandDealt = false;
     private bool _isPlayerCard = true;
     private GameObject _cardRowObject;
+
     private void Awake()
     {
         // instaniate lists
@@ -39,7 +43,11 @@ public class GameController : MonoBehaviour
         _startPositionsPlayArea1 = new List<Vector3>();
         _startPositionsPlayArea2 = new List<Vector3>();
         _startPositionsPlayArea3 = new List<Vector3>();
-        playerList = MainMenuController.players;
+        // playerList = MainMenuController.players;
+        Player player = new Player("test");
+        playerList = new List<Player>();
+        playerList.Add(player);
+
 
     }
     private void Start()
@@ -65,6 +73,8 @@ public class GameController : MonoBehaviour
             cardRowObject.transform.parent = cardsRows.transform;
         }
 
+        // drawCardButton
+        drawCardButton.onClick.AddListener(DrawCards);
     }
 
     private void Update() {
@@ -81,10 +91,17 @@ public class GameController : MonoBehaviour
                 _isLayoutReady = true;
             }
         }
+        // if (_isLayoutReady && !_isHandDealt) {
+        //     DealCards();
+
+        //     // stop if
+        //     _isHandDealt = true;
+        // }
+    }
+
+    private void DrawCards() {
         if (_isLayoutReady && !_isHandDealt) {
             DealCards();
-
-            // stop if
             _isHandDealt = true;
         }
     }
@@ -105,49 +122,52 @@ public class GameController : MonoBehaviour
                     randomNumber = random.Next(_deck.Count - 1);
                     tempCard = _deck[randomNumber];
                 }
-                GameObject cardObject;
+                CardGameObject cardObject;
                 if (_isPlayerCard) {
-                    cardObject = new GameObject(string.Format("{0}", tempCard.CardNumber));
+                    // cardObject = new GameObject(string.Format("{0}", tempCard.CardNumber));
+                    // SetUpCardObject(randomNumber, cardObject, tempCard, player, _startPositionsPlayerArea, i, _playerAreaOffsetY);
+                    cardObject = GameObject.Instantiate<CardGameObject>(cardPrefab);
+                    cardObject.name = string.Format("{0}", tempCard.CardNumber);
                     SetUpCardObject(randomNumber, cardObject, tempCard, player, _startPositionsPlayerArea, i, _playerAreaOffsetY);
                     _isPlayerCard = false;
                 } else {
-                    cardObject = new GameObject(string.Format("{0}", tempCard.CardNumber));
-                    cardObject.transform.parent = player.transform;
-                    _dealtCards.Add(tempCard);
+                    // cardObject = new GameObject(string.Format("{0}", tempCard.CardNumber));
+                    // cardObject.transform.parent = player.transform;
+                    // _dealtCards.Add(tempCard);
                 }
             }
             _isPlayerCard = true;
         }
-        for (int i = 0; i < 4; i++) {
-            randomNumber = random.Next(_deck.Count - 1);
-            tempCard = _deck[randomNumber];
-            while (_dealtCards.Contains(tempCard))
-            {
-                randomNumber = random.Next(_deck.Count - 1);
-                tempCard = _deck[randomNumber];
-            }
-            GameObject cardObject = new GameObject(string.Format("{0}", tempCard.CardNumber));
-            GameObject cardRow;
-            if (i == 0) {
-                cardRow = GameObject.Find(string.Format("CardRow_{0}", i));
-                SetUpCardObject(randomNumber, cardObject, tempCard, cardRow.transform, _startPositionsPlayArea, 0, _playAreaOffsetY);
-            }
-            if (i == 1) {
-                cardRow = GameObject.Find(string.Format("CardRow_{0}", i));
-                SetUpCardObject(randomNumber, cardObject, tempCard, cardRow.transform, _startPositionsPlayArea1, 0, _playArea1OffsetY);
-            }
-            if (i == 2) {
-                cardRow = GameObject.Find(string.Format("CardRow_{0}", i));
-                SetUpCardObject(randomNumber, cardObject, tempCard, cardRow.transform, _startPositionsPlayArea2, 0 , _playArea2OffsetY);
-            }
-            if (i == 3) {
-                cardRow = GameObject.Find(string.Format("CardRow_{0}", i));
-                SetUpCardObject(randomNumber, cardObject, tempCard, cardRow.transform, _startPositionsPlayArea3, 0, _playArea3OffsetY);
-            }
-        }
+        // for (int i = 0; i < 4; i++) {
+        //     randomNumber = random.Next(_deck.Count - 1);
+        //     tempCard = _deck[randomNumber];
+        //     while (_dealtCards.Contains(tempCard))
+        //     {
+        //         randomNumber = random.Next(_deck.Count - 1);
+        //         tempCard = _deck[randomNumber];
+        //     }
+        //     GameObject cardObject = new GameObject(string.Format("{0}", tempCard.CardNumber));
+        //     GameObject cardRow;
+        //     if (i == 0) {
+        //         cardRow = GameObject.Find(string.Format("CardRow_{0}", i));
+        //         SetUpCardObject(randomNumber, cardObject, tempCard, cardRow.transform, _startPositionsPlayArea, 0, _playAreaOffsetY);
+        //     }
+        //     if (i == 1) {
+        //         cardRow = GameObject.Find(string.Format("CardRow_{0}", i));
+        //         SetUpCardObject(randomNumber, cardObject, tempCard, cardRow.transform, _startPositionsPlayArea1, 0, _playArea1OffsetY);
+        //     }
+        //     if (i == 2) {
+        //         cardRow = GameObject.Find(string.Format("CardRow_{0}", i));
+        //         SetUpCardObject(randomNumber, cardObject, tempCard, cardRow.transform, _startPositionsPlayArea2, 0 , _playArea2OffsetY);
+        //     }
+        //     if (i == 3) {
+        //         cardRow = GameObject.Find(string.Format("CardRow_{0}", i));
+        //         SetUpCardObject(randomNumber, cardObject, tempCard, cardRow.transform, _startPositionsPlayArea3, 0, _playArea3OffsetY);
+        //     }
+        // }
     }
 
-    private void SetUpCardObject(int randomNumber, GameObject cardObject, Card tempCard, Transform parent, List<Vector3> positions, int index,  int offset) {
+    private void SetUpCardObject(int randomNumber, CardGameObject cardObject, Card tempCard, Transform parent, List<Vector3> positions, int index,  int offset) {
         cardObject.transform.parent = parent.transform;
         SetCardTexture(randomNumber, cardObject);
         cardObject.transform.localScale = new Vector3(16.5f, 16.75f, 0f);
@@ -177,9 +197,8 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private void SetCardTexture(int randomNumber, GameObject cardObject) {
+    private void SetCardTexture(int randomNumber, CardGameObject cardObject) {
         Texture2D texture = cards.cards[randomNumber];
-        cardObject.AddComponent<SpriteRenderer>();
         cardObject.GetComponent<SpriteRenderer>().sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         cardObject.GetComponent<SpriteRenderer>().sortingLayerName = _layerName;
     }
