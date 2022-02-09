@@ -77,7 +77,7 @@ namespace Assets.Scripts
 
         private void DoTurn(Player player)
         {
-            // player;
+            //player.
         }
 
         private void DealPlayerCards()

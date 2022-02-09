@@ -1,4 +1,5 @@
-    using System;
+using Assets.Scripts.Animations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,7 +38,10 @@ public class Player
             _cardObjects.Add(cardObject);
             SetCardTexture(current.CardNumber, cardObject);
             cardObject.transform.localScale = new Vector3(16.5f, 16.75f, 0f);
-            cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
+            // TODO: animation
+            Debug.Log("new animation");
+            AnimationsController.AddAnimation(new LocalPositionAnimation(cardObject, new Vector3(15,15,15), new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0)));
+            //cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
         }
     }
     public void UpdateScore()

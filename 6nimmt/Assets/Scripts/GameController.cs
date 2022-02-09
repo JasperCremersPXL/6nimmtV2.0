@@ -1,3 +1,4 @@
+using Assets.Scripts.Animations;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -171,7 +172,8 @@ public class GameController : MonoBehaviour
         cardObject.transform.parent = parent.transform;
         SetCardTexture(randomNumber, cardObject);
         cardObject.transform.localScale = new Vector3(16.5f, 16.75f, 0f);
-        cardObject.transform.localPosition = new Vector3(positions[index].x, offset, 0);
+        AnimationsController.AddAnimation(new LocalPositionAnimation(cardObject, new Vector3(1050,0,0), new Vector3(positions[index].x, offset, 0),1f));
+        //cardObject.transform.localPosition = new Vector3(positions[index].x, offset, 0);
         _dealtCards.Add(tempCard);
     }
 
