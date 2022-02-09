@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class Player
 {
+    public CardGameObject cardGameObject;
     public Cards cards;
     public string Name { get; set; }
     public int Score { get; set; }
@@ -15,7 +16,7 @@ public class Player
     private List<Card> _cardsTaken;
     private int _playerAreaOffsetY = -570;
     private string _layerName = "Foreground";
-    private List<GameObject> _cardObjects;
+    private List<CardGameObject> _cardObjects;
 
 
     public Player(string name)
@@ -25,7 +26,7 @@ public class Player
         CardsInHand = new List<Card>();
         _cardsTaken = new List<Card>();
         PlayerCardPositions = new List<Vector3>();
-        _cardObjects = new List<GameObject>();
+        _cardObjects = new List<CardGameObject>();
     }
 
     public void LoadCards()
@@ -33,19 +34,18 @@ public class Player
         for (int i = 0; i < CardsInHand.Count; i++)
         {
             Card current = CardsInHand[i];
-            GameObject cardObject = new GameObject(string.Format("{0}", current.CardNumber));
-            cardObject.AddComponent<ClickEvent>();
+            CardGameObject cardObject = GameObject.Instantiate<CardGameObject>(cardGameObject);
+            cardObject.name = string.Format("{0}", current.CardNumber);
 
-            cardObject.AddComponent<BoxCollider2D>();
             var boxCollider2d = cardObject.GetComponent<BoxCollider2D>();
             boxCollider2d.size = new Vector2(8f, 8f);
             SetCardTexture(current.CardNumber-1, cardObject);
             _cardObjects.Add(cardObject);
             cardObject.transform.localScale = new Vector3(16.5f, 16.75f, 0f);
-            // TODO: animation
-            Debug.Log("new animation");
-            AnimationsController.AddAnimation(new LocalPositionAnimation(cardObject, new Vector3(15,15,15), new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0)));
-            //cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
+        //     // TODO: animation
+        //     Debug.Log("new animation");
+        //     AnimationsController.AddAnimation(new LocalPositionAnimation(cardObject, new Vector3(15,15,15), new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0)));
+        //     //cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
         }
     }
     public void UpdateScore()
@@ -74,10 +74,9 @@ public class Player
         CardsInHand.Add(card);
     }
 
-    private void SetCardTexture(int number, GameObject cardObject)
+    private void SetCardTexture(int number, CardGameObject cardObject)
     {
         Texture2D texture = cards.cards[number];
-        cardObject.AddComponent<SpriteRenderer>();
         cardObject.GetComponent<SpriteRenderer>().sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         cardObject.GetComponent<SpriteRenderer>().sortingLayerName = _layerName;
     }

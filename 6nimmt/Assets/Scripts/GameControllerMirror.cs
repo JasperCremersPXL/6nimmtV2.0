@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +8,10 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
-    public class GameControllerV2 : MonoBehaviour
+    public class GameControllerMirror : MonoBehaviour
     {
+        public CardGameObject cardGameObject;
+        public Button drawCardButton;
         public Text activePlayerText;
         public Cards cards;
         public List<Player> playerList;
@@ -20,8 +22,6 @@ namespace Assets.Scripts
         public GameObject playArea2;
         public GameObject playArea3;
         public GameObject players;
-        public PassingCanvasController passingCanvas;
-
         private List<Card> _dealtCards;
         private List<Card> _deck;
         private List<Card> _roundPlayedCards;
@@ -44,6 +44,14 @@ namespace Assets.Scripts
             _isLayoutReady = false;
             _isHandDealt = false;
             activePlayerText.text = playerList[0].Name;
+
+            // drawCardButton
+            drawCardButton.onClick.AddListener(DrawCards);
+
+            // cardPrefab
+            foreach(var player in playerList) {
+                player.cardGameObject = cardGameObject;
+            }
         }
 
         private void Update()
@@ -60,60 +68,12 @@ namespace Assets.Scripts
                     _isLayoutReady = true;
                 }
             }
-            else if (_isLayoutReady && !_isHandDealt)
-            {
-                ResetRound();
-
-                // stop if
-                _isHandDealt = true;
-            }
-            else if (Input.GetKeyDown(KeyCode.N))
-            {
-                if (currentPlayerIndex == playerList.Count)
-                {
-                    currentPlayerIndex = 0;
-                    turnCount++;
-                    //Kaarten aan rijen toevoegen
-                    if (turnCount == 10)
-                    {
-                        ResetRound();
-                    }
-                }
-                else
-                {
-                    currentPlayerIndex++;
-                    currentPlayer.isDone();
-                    currentPlayer = playerList[currentPlayerIndex % playerList.Count];
-                    currentPlayer.LoadCards();
-                    activePlayerText.text = currentPlayer.Name;
-                }
-            }
         }
 
-        public void OnNextButtonPressed()
-        {
-            
-            
-            if (currentPlayerIndex == playerList.Count)
-            {
-                Debug.Log("Playing cards");
-                currentPlayerIndex = 0;
-                turnCount++;
-                //Kaarten aan rijen toevoegen
-                if (turnCount == 10)
-                {
-                    ResetRound();
-                }
-            }
-            else
-            {
-                passingCanvas.gameObject.SetActive(true);
-                currentPlayerIndex++;
-                currentPlayer.isDone();
-                currentPlayer = playerList[currentPlayerIndex % playerList.Count];
-                currentPlayer.LoadCards();
-                activePlayerText.text = currentPlayer.Name;
-                passingCanvas.SetPlayerName(currentPlayer.Name);
+        private void DrawCards() {
+            if (_isLayoutReady && !_isHandDealt) {
+                ResetRound();
+                _isHandDealt = true;
             }
         }
 
