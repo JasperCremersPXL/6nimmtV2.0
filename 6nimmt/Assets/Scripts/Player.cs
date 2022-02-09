@@ -45,7 +45,7 @@ public class Player
         //     // TODO: animation
         //     Debug.Log("new animation");
         //     AnimationsController.AddAnimation(new LocalPositionAnimation(cardObject, new Vector3(15,15,15), new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0)));
-        //     //cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
+            cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
         }
     }
     public void UpdateScore()
