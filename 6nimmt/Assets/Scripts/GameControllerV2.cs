@@ -20,6 +20,8 @@ namespace Assets.Scripts
         public GameObject playArea2;
         public GameObject playArea3;
         public GameObject players;
+        public PassingCanvasController passingCanvas;
+
         private List<Card> _dealtCards;
         private List<Card> _deck;
         private Dictionary<int, Player> _roundPlayedCards;
@@ -125,6 +127,33 @@ namespace Assets.Scripts
                     rows[lowestDiffIndex].AddCardToCardList(_deck[playedCard.Key - 1]);
                     rows[lowestDiffIndex].LoadCards();
                 }
+            }
+        }
+
+        public void OnNextButtonPressed()
+        {
+            
+            
+            if (currentPlayerIndex == playerList.Count)
+            {
+                Debug.Log("Playing cards");
+                currentPlayerIndex = 0;
+                turnCount++;
+                //Kaarten aan rijen toevoegen
+                if (turnCount == 10)
+                {
+                    ResetRound();
+                }
+            }
+            else
+            {
+                passingCanvas.gameObject.SetActive(true);
+                currentPlayerIndex++;
+                currentPlayer.isDone();
+                currentPlayer = playerList[currentPlayerIndex % playerList.Count];
+                currentPlayer.LoadCards();
+                activePlayerText.text = currentPlayer.Name;
+                passingCanvas.SetPlayerName(currentPlayer.Name);
             }
         }
 
