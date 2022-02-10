@@ -30,6 +30,7 @@ namespace Assets.Scripts
         private int currentPlayerIndex;
         private bool _isLayoutReady;
         private bool _isHandDealt;
+        private bool _isPassing = false;
 
         private void Start()
         {
@@ -41,7 +42,7 @@ namespace Assets.Scripts
             playerList.Add(new Player("Test2"));
             playerList.Add(new Player("Test3"));
             _deck = Deck.CreateDeck();
-            _roundPlayedCards = new Dictionary<int,Player>();
+            _roundPlayedCards = new Dictionary<int, Player>();
             _isLayoutReady = false;
             _isHandDealt = false;
             activePlayerText.text = playerList[0].Name;
@@ -69,9 +70,11 @@ namespace Assets.Scripts
                 _isHandDealt = true;
                 Debug.Log($"last number in deck {_deck[_deck.Count - 1].CardNumber}");
             }
-            else if (Input.GetKeyDown(KeyCode.N) && ClickUtil.PrevGameObject != null)
+            else if (_isPassing && ClickUtil.PrevGameObject != null)
             {
-                Card selectedCard = _deck[Convert.ToInt32(ClickUtil.PrevGameObject.name)-1];
+                passingCanvas.gameObject.SetActive(true);
+                passingCanvas.SetPlayerName(currentPlayer.Name);
+                Card selectedCard = _deck[Convert.ToInt32(ClickUtil.PrevGameObject.name) - 1];
                 _roundPlayedCards.Add(selectedCard.CardNumber, currentPlayer);
                 currentPlayer.CardsInHand.Remove(selectedCard);
                 Debug.Log($"Added card number { selectedCard.CardNumber } to playedCards");
@@ -93,34 +96,39 @@ namespace Assets.Scripts
                     currentPlayerIndex++;
                 }
                 currentPlayer.isDone();
+
+                foreach(var row in rows)
+                {
+                    row.ClearUI();
+                }
                 Debug.Log($"player index {currentPlayerIndex}");
                 currentPlayer = playerList[currentPlayerIndex];
-                currentPlayer.LoadCards();
                 activePlayerText.text = currentPlayer.Name;
                 ClickUtil.PrevGameObject = null;
             }
+            _isPassing = false;
         }
 
-        private void AddPlayedCardsToRows() 
+        private void AddPlayedCardsToRows()
         {
             Debug.Log($"played cards: {_roundPlayedCards.Count}");
-            foreach(KeyValuePair<int, Player> playedCard in _roundPlayedCards.OrderBy(key => key.Key))
+            foreach (KeyValuePair<int, Player> playedCard in _roundPlayedCards.OrderBy(key => key.Key))
             {
                 int lowestDiff = 110;
                 int lowestDiffIndex = -1;
-                for (int i = 0; i < rows.Count; i++) 
+                for (int i = 0; i < rows.Count; i++)
                 {
                     int currentDiff = rows[i].GetDifference(playedCard.Key);
-                    if(currentDiff < lowestDiff) 
+                    if (currentDiff < lowestDiff)
                     {
                         lowestDiff = currentDiff;
                         lowestDiffIndex = i;
                     }
                 }
                 Debug.Log($"card nr: {playedCard.Key}\nrow index: {lowestDiffIndex}");
-                if(lowestDiffIndex != -1)
+                if (lowestDiffIndex != -1)
                 {
-                    if(rows[lowestDiffIndex].IsFull) 
+                    if (rows[lowestDiffIndex].IsFull)
                     {
                         playedCard.Value.TakeRow(rows[lowestDiffIndex]);
                     }
@@ -130,31 +138,19 @@ namespace Assets.Scripts
             }
         }
 
+        public void NextPlayerTurn()
+        {
+            passingCanvas.gameObject.SetActive(false);
+            currentPlayer.LoadCards();
+            foreach(var row in rows)
+            {
+                row.LoadCards();
+            }
+        }
+
         public void OnNextButtonPressed()
         {
-            
-            
-            if (currentPlayerIndex == playerList.Count)
-            {
-                Debug.Log("Playing cards");
-                currentPlayerIndex = 0;
-                turnCount++;
-                //Kaarten aan rijen toevoegen
-                if (turnCount == 10)
-                {
-                    ResetRound();
-                }
-            }
-            else
-            {
-                passingCanvas.gameObject.SetActive(true);
-                currentPlayerIndex++;
-                currentPlayer.isDone();
-                currentPlayer = playerList[currentPlayerIndex % playerList.Count];
-                currentPlayer.LoadCards();
-                activePlayerText.text = currentPlayer.Name;
-                passingCanvas.SetPlayerName(currentPlayer.Name);
-            }
+            _isPassing = true;
         }
 
         private void ResetRound()
@@ -169,7 +165,7 @@ namespace Assets.Scripts
                 currentPlayerIndex = 0;
                 currentPlayer = playerList[currentPlayerIndex];
                 currentPlayer.LoadCards();
-                foreach(var row in rows)
+                foreach (var row in rows)
                 {
                     row.LoadCards();
                 }

@@ -50,7 +50,7 @@ public class Row
             CardList.Add(card);
     }
 
-    private void ClearUI() 
+    public void ClearUI() 
     {
         foreach (var cardObject in _cardObjects) 
         {

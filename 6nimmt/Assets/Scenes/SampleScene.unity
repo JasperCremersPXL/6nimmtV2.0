@@ -238,6 +238,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac7936cb0a7dbb54189caaf800025673, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerName: {fileID: 88102874}
 --- !u!1001 &73204211
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -903,7 +904,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Button
+  m_Text: Volgende speler
 --- !u!222 &360147247
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1863,7 +1864,7 @@ MonoBehaviour:
   playArea2: {fileID: 1179429225}
   playArea3: {fileID: 432683611}
   players: {fileID: 1319898354}
-  passingCanvas: {fileID: 24984976}
+  passingCanvas: {fileID: 24984981}
 --- !u!4 &765832527
 Transform:
   m_ObjectHideFlags: 0
@@ -2063,9 +2064,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 24984981}
-        m_TargetAssemblyTypeName: PassingCanvasController, Assembly-CSharp
-        m_MethodName: RemoveCanvas
+      - m_Target: {fileID: 765832526}
+        m_TargetAssemblyTypeName: Assets.Scripts.GameControllerV2, Assembly-CSharp
+        m_MethodName: NextPlayerTurn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3546,7 +3547,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 765832526}
         m_TargetAssemblyTypeName: Assets.Scripts.GameControllerV2, Assembly-CSharp
-        m_MethodName: NextPlayer
+        m_MethodName: OnNextButtonPressed
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
