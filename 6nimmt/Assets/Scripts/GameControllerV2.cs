@@ -13,6 +13,7 @@ namespace Assets.Scripts
     {
         public Text activePlayerText;
         public Text activePlayerScore;
+        public Text endScoreText;
         public Cards cards;
         public List<Player> playerList;
         public List<Row> rows;
@@ -37,80 +38,94 @@ namespace Assets.Scripts
 
         private void Start()
         {
+            
             //playerList = MainMenuController.players;
-            _dealtCards = new List<Card>();
             playerList = new List<Player>();
+            _dealtCards = new List<Card>();
+            //playerList = new List<Player>();
             rows = new List<Row>();
-            playerList.Add(new Player("Test1"));
-            playerList.Add(new Player("Test2"));
-            playerList.Add(new Player("Test3"));
+            //playerList.Add(new Player("Test1"));
+            //playerList.Add(new Player("Test2"));
+            //playerList.Add(new Player("Test3"));
             _deck = Deck.CreateDeck();
             _roundPlayedCards = new Dictionary<int, Player>();
             _isLayoutReady = false;
             _isHandDealt = false;
-            activePlayerText.text = playerList[0].Name;
-            activePlayerScore.text = $"Score: {playerList[0].Score}";
         }
 
         private void Update()
         {
-            if (!_isLayoutReady)
+            if(playerList.Count == 0) 
             {
-                if (playerArea.transform.GetChild(0).GetComponent<RectTransform>().anchoredPosition.x != 0)
+                playerList = MainMenuController.players;
+                activePlayerText.text = playerList[0].Name;
+                activePlayerScore.text = $"Score: {playerList[0].Score}";
+            } 
+            else 
+            { 
+                if (!_isLayoutReady)
                 {
-                    // get x localPosition of playerarea
-                    GetPlayerAreaStartPositions();
-
-                    GetPlayAreaStartPositions();
-                    // stop if
-                    _isLayoutReady = true;
-                }
-            }
-            else if (_isLayoutReady && !_isHandDealt)
-            {
-                ResetRound();
-                currentPlayerIndex = 0;
-                currentPlayer = playerList[currentPlayerIndex];
-                currentPlayer.LoadCards();
-                // stop if
-                _isHandDealt = true;
-            }
-            else if (_isPassing && ClickUtil.PrevGameObject != null)
-            {
-                
-                Card selectedCard = _deck[Convert.ToInt32(ClickUtil.PrevGameObject.name) - 1];
-                _roundPlayedCards.Add(selectedCard.CardNumber, currentPlayer);
-                currentPlayer.CardsInHand.Remove(selectedCard);
-                if (currentPlayerIndex == playerList.Count - 1)
-                {
-                    currentPlayerIndex = 0;
-                    turnCount++;
-                    AddPlayedCardsToRows();
-                    //Kaarten aan rijen toevoegen
-                    if (turnCount == 10)
+                    if (playerArea.transform.GetChild(0).GetComponent<RectTransform>().anchoredPosition.x != 0)
                     {
-                        ResetRound();
-                    }
-                    _roundPlayedCards.Clear();
-                }
-                else
-                {
-                    currentPlayerIndex++;
-                }
-                currentPlayer.isDone();
+                        // get x localPosition of playerarea
+                        GetPlayerAreaStartPositions();
 
-                foreach(var row in rows)
-                {
-                    row.ClearUI();
+                        GetPlayAreaStartPositions();
+                        // stop if
+                        _isLayoutReady = true;
+                    }
                 }
-                currentPlayer = playerList[currentPlayerIndex];
-                activePlayerText.text = currentPlayer.Name;
-                activePlayerScore.text = $"Score: {currentPlayer.Score}";
-                ClickUtil.PrevGameObject = null;
-                passingCanvas.gameObject.SetActive(true);
-                passingCanvas.SetPlayerName(currentPlayer.Name);
+                else if (_isLayoutReady && !_isHandDealt)
+                {
+                    ResetRound();
+                    currentPlayerIndex = 0;
+                    currentPlayer = playerList[currentPlayerIndex];
+                    currentPlayer.LoadCards();
+                    // stop if
+                    _isHandDealt = true;
+                }
+                else if (_isPassing && ClickUtil.PrevGameObject != null)
+                {
+                    
+                    Card selectedCard = _deck[Convert.ToInt32(ClickUtil.PrevGameObject.name) - 1];
+                    _roundPlayedCards.Add(selectedCard.CardNumber, currentPlayer);
+                    currentPlayer.CardsInHand.Remove(selectedCard);
+                    if (currentPlayerIndex == playerList.Count - 1)
+                    {
+                        currentPlayerIndex = 0;
+                        turnCount++;
+                        AddPlayedCardsToRows();
+                        //Kaarten aan rijen toevoegen
+                        if (turnCount == 10)
+                        {
+                            ResetRound();
+                            if(GameOver())
+                            {
+                                EndGame();
+                                return;
+                            }
+                        }
+                        _roundPlayedCards.Clear();
+                    }
+                    else
+                    {
+                        currentPlayerIndex++;
+                    }
+                    currentPlayer.isDone();
+
+                    foreach(var row in rows)
+                    {
+                        row.ClearUI();
+                    }
+                    currentPlayer = playerList[currentPlayerIndex];
+                    activePlayerText.text = currentPlayer.Name;
+                    activePlayerScore.text = $"Score: {currentPlayer.Score}";
+                    ClickUtil.PrevGameObject = null;
+                    passingCanvas.gameObject.SetActive(true);
+                    passingCanvas.SetPlayerName(currentPlayer.Name);
+                }
+                _isPassing = false;
             }
-            _isPassing = false;
         }
 
         private void AddPlayedCardsToRows()
@@ -175,12 +190,14 @@ namespace Assets.Scripts
         private void ResetRound()
         {
             UpdatePlayerScores();
+            _dealtCards.Clear();
+            foreach(var row in rows) 
+            {
+                row.ResetRow();
+            }
+
             if (!GameOver())
             {
-                _dealtCards.Clear();
-                foreach(var row in rows) {
-                    row.ResetRow();
-                }
                 DealPlayerCards();
                 DealRowCards();
                 turnCount = 0;
@@ -188,10 +205,6 @@ namespace Assets.Scripts
                 {
                     row.LoadCards();
                 }
-            }
-            else
-            {
-                EndGame();
             }
         }
 
@@ -226,19 +239,18 @@ namespace Assets.Scripts
             {
                 row.ClearUI();
             }
+
             playAgainCanvas.gameObject.SetActive(true);
             playerList.OrderByDescending(k => k.Score);
-            playAgainCanvas.gameObject.AddComponent<Text>();
-            var text = playAgainCanvas.gameObject.GetComponent<Text>();
+            //playAgainCanvas.gameObject.AddComponent<Text>();
+            //var text = playAgainCanvas.gameObject.GetComponent<Text>();
             StringBuilder builder = new StringBuilder();
             foreach (var player in playerList)
             {
-                builder.Append($"Player: {player.Name} Score: {player.Score}\n");
+                builder.Append($"Player: {player.Name} - Score: {player.Score}\n");
                 
             }
-            text.text = builder.ToString();
-            text.color = Color.white;
-            text.fontSize = 32;
+            endScoreText.text = builder.ToString();
         }
 
         public void PlayAgain()

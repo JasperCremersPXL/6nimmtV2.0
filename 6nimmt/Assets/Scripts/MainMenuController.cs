@@ -32,6 +32,7 @@ public class MainMenuController : MonoBehaviour
         {
             var newInputField = GameObject.Instantiate<GameObject>(inputFieldPrefab);
             newInputField.transform.SetParent(inputFields.transform);
+            newInputField.transform.localScale = new Vector3(1,1,1);
         }
         else
         {
