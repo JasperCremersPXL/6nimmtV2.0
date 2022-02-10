@@ -58,6 +58,6 @@ public class MainMenuController : MonoBehaviour
             popupNotEnoughPlayers.gameObject.SetActive(true);
             return;
         }
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene(1);
     }
 }
