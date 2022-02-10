@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Assets.Scripts
@@ -22,6 +23,7 @@ namespace Assets.Scripts
         public GameObject playArea3;
         public GameObject players;
         public PassingCanvasController passingCanvas;
+        public Canvas playAgainCanvas;
 
         private List<Card> _dealtCards;
         private List<Card> _deck;
@@ -216,7 +218,33 @@ namespace Assets.Scripts
 
         private void EndGame()
         {
-            throw new NotImplementedException();
+            _isPassing = false;
+            _roundPlayedCards.Clear();
+            currentPlayer.isDone();
+
+            foreach (var row in rows)
+            {
+                row.ClearUI();
+            }
+            playAgainCanvas.gameObject.SetActive(true);
+            playerList.OrderByDescending(k => k.Score);
+            playAgainCanvas.gameObject.AddComponent<Text>();
+            var text = playAgainCanvas.gameObject.GetComponent<Text>();
+            StringBuilder builder = new StringBuilder();
+            foreach (var player in playerList)
+            {
+                builder.Append($"Player: {player.Name} Score: {player.Score}\n");
+                
+            }
+            text.text = builder.ToString();
+            text.color = Color.white;
+            text.fontSize = 32;
+        }
+
+        public void PlayAgain()
+        {
+            playAgainCanvas.gameObject.SetActive(false);
+            SceneManager.LoadScene(1);
         }
 
         public void UpdatePlayerScores()
@@ -231,7 +259,7 @@ namespace Assets.Scripts
         {
             foreach (var player in playerList)
             {
-                if (player.Score > 66)
+                if (player.Score > 5)
                 {
                     return true;
                 }
