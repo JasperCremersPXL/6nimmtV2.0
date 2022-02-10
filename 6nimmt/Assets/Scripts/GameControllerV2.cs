@@ -75,8 +75,7 @@ namespace Assets.Scripts
             }
             else if (_isPassing && ClickUtil.PrevGameObject != null)
             {
-                passingCanvas.gameObject.SetActive(true);
-                passingCanvas.SetPlayerName(currentPlayer.Name);
+                
                 Card selectedCard = _deck[Convert.ToInt32(ClickUtil.PrevGameObject.name) - 1];
                 _roundPlayedCards.Add(selectedCard.CardNumber, currentPlayer);
                 currentPlayer.CardsInHand.Remove(selectedCard);
@@ -106,6 +105,8 @@ namespace Assets.Scripts
                 activePlayerText.text = currentPlayer.Name;
                 activePlayerScore.text = $"Score: {currentPlayer.Score}";
                 ClickUtil.PrevGameObject = null;
+                passingCanvas.gameObject.SetActive(true);
+                passingCanvas.SetPlayerName(currentPlayer.Name);
             }
             _isPassing = false;
         }
