@@ -65,10 +65,11 @@ namespace Assets.Scripts
             else if (_isLayoutReady && !_isHandDealt)
             {
                 ResetRound();
-
+                currentPlayerIndex = 0;
+                currentPlayer = playerList[currentPlayerIndex];
+                currentPlayer.LoadCards();
                 // stop if
                 _isHandDealt = true;
-                Debug.Log($"last number in deck {_deck[_deck.Count - 1].CardNumber}");
             }
             else if (_isPassing && ClickUtil.PrevGameObject != null)
             {
@@ -77,7 +78,6 @@ namespace Assets.Scripts
                 Card selectedCard = _deck[Convert.ToInt32(ClickUtil.PrevGameObject.name) - 1];
                 _roundPlayedCards.Add(selectedCard.CardNumber, currentPlayer);
                 currentPlayer.CardsInHand.Remove(selectedCard);
-                Debug.Log($"Added card number { selectedCard.CardNumber } to playedCards");
                 if (currentPlayerIndex == playerList.Count - 1)
                 {
                     currentPlayerIndex = 0;
@@ -87,7 +87,6 @@ namespace Assets.Scripts
                     if (turnCount == 10)
                     {
                         ResetRound();
-                        return;
                     }
                     _roundPlayedCards.Clear();
                 }
@@ -101,7 +100,6 @@ namespace Assets.Scripts
                 {
                     row.ClearUI();
                 }
-                Debug.Log($"player index {currentPlayerIndex}");
                 currentPlayer = playerList[currentPlayerIndex];
                 activePlayerText.text = currentPlayer.Name;
                 ClickUtil.PrevGameObject = null;
@@ -111,7 +109,6 @@ namespace Assets.Scripts
 
         private void AddPlayedCardsToRows()
         {
-            Debug.Log($"played cards: {_roundPlayedCards.Count}");
             foreach (KeyValuePair<int, Player> playedCard in _roundPlayedCards.OrderBy(key => key.Key))
             {
                 int lowestDiff = 110;
@@ -125,7 +122,6 @@ namespace Assets.Scripts
                         lowestDiffIndex = i;
                     }
                 }
-                Debug.Log($"card nr: {playedCard.Key}\nrow index: {lowestDiffIndex}");
                 if (lowestDiffIndex != -1)
                 {
                     if (rows[lowestDiffIndex].IsFull)
@@ -134,6 +130,23 @@ namespace Assets.Scripts
                     }
                     rows[lowestDiffIndex].AddCardToCardList(_deck[playedCard.Key - 1]);
                     rows[lowestDiffIndex].LoadCards();
+                } else {
+                    int lowestScore = 150;
+                    int lowestScoreIndex = -1;
+                    for(int i = 0; i < rows.Count; i++) 
+                    {
+                        int rowScore = rows[i].GetRowScore();
+                        Debug.Log($"Row {i+1} has score {rowScore}");
+                        if(rowScore < lowestScore) 
+                        {
+                            lowestScore = rowScore;
+                            lowestScoreIndex = i;
+                        }
+                    }
+                    Debug.Log($"player {playedCard.Value.Name} had to take row {lowestScoreIndex+1}");
+                    playedCard.Value.TakeRow(rows[lowestScoreIndex]);
+                    rows[lowestScoreIndex].AddCardToCardList(_deck[playedCard.Key - 1]);
+                    rows[lowestScoreIndex].LoadCards();
                 }
             }
         }
@@ -159,12 +172,12 @@ namespace Assets.Scripts
             if (!GameOver())
             {
                 _dealtCards.Clear();
+                foreach(var row in rows) {
+                    row.ResetRow();
+                }
                 DealPlayerCards();
                 DealRowCards();
                 turnCount = 0;
-                currentPlayerIndex = 0;
-                currentPlayer = playerList[currentPlayerIndex];
-                currentPlayer.LoadCards();
                 foreach (var row in rows)
                 {
                     row.LoadCards();
@@ -220,20 +233,6 @@ namespace Assets.Scripts
                 }
             }
             return false;
-        }
-
-        private void DoRound()
-        {
-            Player player = playerList[0];
-            for (int i = 0; i < 10; i++)
-            {
-                DoTurn(player);
-            }
-        }
-
-        private void DoTurn(Player player)
-        {
-            throw new NotImplementedException();
         }
 
         private void DealPlayerCards()

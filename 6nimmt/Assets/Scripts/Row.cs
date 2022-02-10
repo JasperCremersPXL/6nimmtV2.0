@@ -28,6 +28,22 @@ public class Row
 
     }
 
+    public int GetRowScore() 
+    {
+        int score = 0;
+        foreach(var card in CardList)
+        {
+            score += card.AmountTriangles;
+        }
+        return score;
+    }
+
+    public void ResetRow() 
+    {
+        ClearUI();
+        CardList.Clear();
+    }
+
     public void LoadCards()
     {
         if(_cardObjects.Count != 0)

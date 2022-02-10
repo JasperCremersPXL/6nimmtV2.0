@@ -37,7 +37,6 @@ public class Player
             cardObject.AddComponent<BoxCollider2D>();
             var boxCollider2d = cardObject.GetComponent<BoxCollider2D>();
             boxCollider2d.size = new Vector2(8f, 8f);
-            Debug.Log($"player card number: {current.CardNumber}");
             SetCardTexture(current.CardNumber, cardObject);
             _cardObjects.Add(cardObject);
             cardObject.transform.localScale = new Vector3(16.5f, 16.75f, 0f);
