@@ -11,6 +11,7 @@ namespace Assets.Scripts
     public class GameControllerV2 : MonoBehaviour
     {
         public Text activePlayerText;
+        public Text activePlayerScore;
         public Cards cards;
         public List<Player> playerList;
         public List<Row> rows;
@@ -46,6 +47,7 @@ namespace Assets.Scripts
             _isLayoutReady = false;
             _isHandDealt = false;
             activePlayerText.text = playerList[0].Name;
+            activePlayerScore.text = $"Score: {playerList[0].Score}";
         }
 
         private void Update()
@@ -102,6 +104,7 @@ namespace Assets.Scripts
                 }
                 currentPlayer = playerList[currentPlayerIndex];
                 activePlayerText.text = currentPlayer.Name;
+                activePlayerScore.text = $"Score: {currentPlayer.Score}";
                 ClickUtil.PrevGameObject = null;
             }
             _isPassing = false;
