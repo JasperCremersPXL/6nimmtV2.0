@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class Player
 {
-    public CardGameObject cardGameObject;
+    public GameObject cardGameObject;
     public Cards cards;
     public string Name { get; set; }
     public int Score { get; set; }
@@ -16,7 +16,7 @@ public class Player
     private List<Card> _cardsTaken;
     private int _playerAreaOffsetY = -570;
     private string _layerName = "Foreground";
-    private List<CardGameObject> _cardObjects;
+    private List<GameObject> _cardObjects;
 
 
     public Player(string name)
@@ -26,7 +26,7 @@ public class Player
         CardsInHand = new List<Card>();
         _cardsTaken = new List<Card>();
         PlayerCardPositions = new List<Vector3>();
-        _cardObjects = new List<CardGameObject>();
+        _cardObjects = new List<GameObject>();
     }
 
     public void LoadCards()
@@ -34,7 +34,7 @@ public class Player
         for (int i = 0; i < CardsInHand.Count; i++)
         {
             Card current = CardsInHand[i];
-            CardGameObject cardObject = GameObject.Instantiate<CardGameObject>(cardGameObject);
+            GameObject cardObject = GameObject.Instantiate<GameObject>(cardGameObject);
             cardObject.name = string.Format("{0}", current.CardNumber);
 
             var boxCollider2d = cardObject.GetComponent<BoxCollider2D>();
@@ -74,7 +74,7 @@ public class Player
         CardsInHand.Add(card);
     }
 
-    private void SetCardTexture(int number, CardGameObject cardObject)
+    private void SetCardTexture(int number, GameObject cardObject)
     {
         Texture2D texture = cards.cards[number];
         cardObject.GetComponent<SpriteRenderer>().sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));

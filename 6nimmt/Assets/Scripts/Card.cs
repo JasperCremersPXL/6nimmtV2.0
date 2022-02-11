@@ -12,4 +12,8 @@ public class Card
         _cardNumber = number;
         _amountTriangles = triangles;
     }
+
+    public Card() {
+        
+    }
 }
