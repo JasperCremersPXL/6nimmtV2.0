@@ -14,9 +14,12 @@ public class PlayerManager : NetworkBehaviour
     public GameObject Row3;
     public GameObject Row4;
     public GameObject DropZone;
+    public GameObject PlayedCards;
+    public CardManager CardManagerPrefab;
     public CardManager CardManager;
     public bool CanSelectCard = true;
     public List<GameObject> CardsInHand;
+    public List<GameObject> Rows;
 
     private bool cardsDealt = false;
 
@@ -29,15 +32,50 @@ public class PlayerManager : NetworkBehaviour
         Row2 = GameObject.Find("Row2");
         Row3 = GameObject.Find("Row3");
         Row4 = GameObject.Find("Row4");
+        Rows = new List<GameObject>();
+        Rows.Add(Row1);
+        Rows.Add(Row2);
+        Rows.Add(Row3);
+        Rows.Add(Row4);
         DropZone = GameObject.Find("DropZone");
+        PlayedCards = GameObject.Find("PlayedCards");
         CardsInHand = new List<GameObject>();
+        if(Row1.transform.childCount == 0)
+        {
+            CmdGetRowCards();
+        }
     }
 
     [Server]
     public override void OnStartServer() 
     {
         base.OnStartServer();
+        CardManager = Instantiate(CardManagerPrefab, new Vector2(0,0), Quaternion.identity);
+        CardManager.InstantiateRows();
+        DealRowCards();
+    }
 
+    public void DealRowCards() 
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            GameObject card = Instantiate(Card, new Vector2(0,0), Quaternion.identity);
+            int cardnumber = CardManager.GetCardNumber(card);
+            CardManager.AddCardToRow(card, i);
+            NetworkServer.Spawn(card, connectionToClient);
+        }
+    }
+
+    [Command]
+    public void CmdGetRowCards() 
+    {
+        for(int i = 0; i < CardManager.Rows.Count; i++) 
+        {
+            foreach(var card in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
+            {
+                RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "dealt", i);
+            }
+        }
     }
 
     [Command]
@@ -48,36 +86,51 @@ public class PlayerManager : NetworkBehaviour
             for (int j = 0; j < 10; j++)
             {
                 GameObject card = Instantiate(Card, new Vector2(0,0), Quaternion.identity);
-                CardsInHand.Add(card);
                 int cardNumber = CardManager.GetCardNumber(card);
                 NetworkServer.Spawn(card, connectionToClient);
-                RpcShowCards(card, cardNumber, "dealt");
+                RpcShowCards(card, cardNumber, "dealt", -1);
             }
             cardsDealt = true;
         }
     }
 
-    [Command]
-    public void CmdSelectCard(GameObject card) 
+    public void PlayCard(GameObject card) 
     {
-        CardManager.PlayCard(card);
+        CmdPlayCard(card);
+    }
+
+    [Command]
+    void CmdPlayCard(GameObject card)
+    {
+        RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "played", -1);
         RpcDisableCards();
     }
 
     [ClientRpc]
-    void RpcShowCards(GameObject card, int cardNumber, string type) 
+    void RpcShowCards(GameObject card, int cardNumber, string type, int rowIndex) 
     {
         if (type == "dealt")
         {
-            if(hasAuthority) 
+            if(rowIndex < 0) 
             {
-                card.transform.SetParent(PlayerArea.transform, false);
+                if(hasAuthority) 
+                {
+                    card.transform.SetParent(PlayerArea.transform, false);
+                    card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
+                    CardsInHand.Add(card);
+                }
+            } 
+            else
+            {
+                GameObject row = Rows[rowIndex];
+                card.transform.SetParent(row.transform, false);
                 card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
+                card.GetComponent<DragDrop>().isDraggable = false;
             }
         }
         else if (type == "played")
         {
-
+            card.transform.SetParent(PlayedCards.transform, false);
         }
     }
 
@@ -86,9 +139,9 @@ public class PlayerManager : NetworkBehaviour
     {
         if(hasAuthority)
         {
-            foreach(GameObject cardInHand in CardsInHand) 
+            foreach(GameObject card in CardsInHand) 
             {
-                cardInHand.GetComponent<DragDrop>().isDraggable = false;
+                card.GetComponent<DragDrop>().isDraggable = false;
             }
         }
     }

@@ -105,4 +105,9 @@ MonoBehaviour:
   Row3: {fileID: 0}
   Row4: {fileID: 0}
   DropZone: {fileID: 0}
-  CardManager: {fileID: 1549077133538117325, guid: b58bd520a6672bfb491032f6c5b0bc0b, type: 3}
+  PlayedCards: {fileID: 0}
+  CardManagerPrefab: {fileID: 1549077133538117325, guid: b58bd520a6672bfb491032f6c5b0bc0b, type: 3}
+  CardManager: {fileID: 0}
+  CanSelectCard: 1
+  CardsInHand: []
+  Rows: []

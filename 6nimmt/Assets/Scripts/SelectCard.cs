@@ -15,7 +15,7 @@ public class SelectCard : NetworkBehaviour
             GameObject card = DropZone.transform.GetChild(0).gameObject;
             NetworkIdentity networkIdentity = NetworkClient.connection.identity;
             PlayerManager = networkIdentity.GetComponent<PlayerManager>();
-            PlayerManager.CmdSelectCard(card);
+            //PlayerManager.CmdSelectCard(card);
         }
     }
 }
