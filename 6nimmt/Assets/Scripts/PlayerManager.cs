@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
+using System.Linq;
 
 public class PlayerManager : NetworkBehaviour
 {
@@ -117,23 +118,29 @@ public class PlayerManager : NetworkBehaviour
 
         if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
         {
+            CardManager.CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber);
+
             for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
             {
-                // Debug.Log(CardManager.CardsPlayedThisRound[i]);
-                // foreach(var obj in connectionToClient.clientOwnedObjects) {
-                //     Debug.Log(obj);
+                // foreach(Mirror.NetworkIdentity networkIdentity in clients[i].clientOwnedObjects) {
+                //     if (networkIdentity.gameObject == card) {
+                //         Debug.Log(networkIdentity.gameObject.GetComponent<CardInfo>().CardNumber);
+
+                //     }
                 // }
-                Debug.Log(card);
-                foreach(var obj in clients[i].clientOwnedObjects) {
-                    // Debug.Log(obj.GetComponents<Component>());
-                    foreach (var component in obj.GetComponents<Component>()) {
-                        Debug.Log(component.GetComponent<CardInfo>());
+
+                int lowestDiff = 999999999;
+                int lowestDiffIndex = -1;
+                for (int j = 0; j < CardManager.Rows.Count; j++) {
+                    int currentDiff = CardManager.Rows[j].GetComponent<RowManager>().GetDifference(card.GetComponent<CardInfo>().CardNumber);
+                    if (currentDiff < lowestDiff)
+                    {
+                        lowestDiff = currentDiff;
+                        lowestDiffIndex = j;
                     }
-                    
-                    // if (obj.GetComponent<CardInfo>().CardNumber == card.GetComponent<CardInfo>().CardNumber) {
-                    //     Debug.Log("test");
-                    // }
                 }
+                Debug.Log(lowestDiffIndex);
+                
             }
         }
         //RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "played", -1);

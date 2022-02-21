@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 973194031331466029}
   - component: {fileID: 8921216524714809747}
   - component: {fileID: -7774869144008595143}
-  - component: {fileID: -2196732126822090014}
+  - component: {fileID: 733857389802715125}
   m_Layer: 6
   m_Name: Card
   m_TagString: Untagged
@@ -94,7 +94,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50141e561d682202b98af86dee7b3a62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   Canvas: {fileID: 0}
+  isDraggable: 1
 --- !u!114 &-5703933290772264812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -238,7 +241,7 @@ MonoBehaviour:
   showGizmos: 0
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
---- !u!114 &-2196732126822090014
+--- !u!114 &733857389802715125
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -247,6 +250,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6443458836498516853}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 487cf81cdf4871e8d9b9d2d58174df71, type: 3}
+  m_Script: {fileID: 11500000, guid: 8ea4d8b006c413731ad12bf74a7fc971, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CardNumber: 0

@@ -10,4 +10,9 @@ public class RowManager : MonoBehaviour
     {
         CardsInRow.Add(card);
     }
+
+    public int GetDifference(int playedCard)
+    {
+        return CardsInRow[CardsInRow.Count - 1].GetComponent<CardInfo>().CardNumber > playedCard ? 999999999 : playedCard - CardsInRow[CardsInRow.Count - 1].GetComponent<CardInfo>().CardNumber;
+    }
 }
