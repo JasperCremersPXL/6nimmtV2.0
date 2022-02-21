@@ -5,8 +5,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
 
-public class PlayerManager : NetworkBehaviour 
+public class PlayerManager : NetworkBehaviour
 {
+
     public GameObject Card;
     public GameObject PlayerArea;
     public GameObject Row1;
@@ -22,8 +23,10 @@ public class PlayerManager : NetworkBehaviour
     public List<GameObject> Rows;
 
     private bool cardsDealt = false;
+    private static int numberOfPlayers = 0;
+    private static List<int> chosenCards = new List<int>();
 
-    public override void OnStartClient() 
+    public override void OnStartClient()
     {
         base.OnStartClient();
 
@@ -40,30 +43,31 @@ public class PlayerManager : NetworkBehaviour
         DropZone = GameObject.Find("DropZone");
         PlayedCards = GameObject.Find("PlayedCards");
         CardsInHand = new List<GameObject>();
-        if(Row1.transform.childCount == 0)
+        if (Row1.transform.childCount == 0)
         {
             CmdGetRowCards();
         }
+        numberOfPlayers++;
     }
 
     [Server]
-    public override void OnStartServer() 
+    public override void OnStartServer()
     {
         base.OnStartServer();
-        CardManager = Instantiate(CardManagerPrefab, new Vector2(0,0), Quaternion.identity);
+        CardManager = Instantiate(CardManagerPrefab, new Vector2(0, 0), Quaternion.identity);
         CardManager.InstantiateRows();
-        if(!RowCardsDealt.RowCardsAreDealt)
+        if (!RowCardsDealt.RowCardsAreDealt)
         {
             DealRowCards();
             RowCardsDealt.RowCardsAreDealt = true;
         }
     }
 
-    public void DealRowCards() 
+    public void DealRowCards()
     {
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
-            GameObject card = Instantiate(Card, new Vector2(0,0), Quaternion.identity);
+            GameObject card = Instantiate(Card, new Vector2(0, 0), Quaternion.identity);
             int cardnumber = CardManager.GetCardNumber(card);
             CardManager.AddCardToRow(card, i);
             NetworkServer.Spawn(card, connectionToClient);
@@ -71,11 +75,11 @@ public class PlayerManager : NetworkBehaviour
     }
 
     [Command]
-    public void CmdGetRowCards() 
+    public void CmdGetRowCards()
     {
-        for(int i = 0; i < CardManager.Rows.Count; i++) 
+        for (int i = 0; i < CardManager.Rows.Count; i++)
         {
-            foreach(var card in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
+            foreach (var card in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
             {
                 RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "dealt", i);
             }
@@ -85,11 +89,11 @@ public class PlayerManager : NetworkBehaviour
     [Command]
     public void CmdDealCards()
     {
-        if(!cardsDealt)
+        if (!cardsDealt)
         {
             for (int j = 0; j < 10; j++)
             {
-                GameObject card = Instantiate(Card, new Vector2(0,0), Quaternion.identity);
+                GameObject card = Instantiate(Card, new Vector2(0, 0), Quaternion.identity);
                 int cardNumber = CardManager.GetCardNumber(card);
                 NetworkServer.Spawn(card, connectionToClient);
                 RpcShowCards(card, cardNumber, "dealt", -1);
@@ -98,7 +102,7 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-    public void PlayCard(GameObject card) 
+    public void PlayCard(GameObject card)
     {
         CmdPlayCard(card);
     }
@@ -106,24 +110,33 @@ public class PlayerManager : NetworkBehaviour
     [Command]
     void CmdPlayCard(GameObject card)
     {
-        RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "played", -1);
-        RpcDisableCards();
+        CardManager.PlayCard(card);
+
+        if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
+        {
+            for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
+            {
+                Debug.Log(CardManager.CardsPlayedThisRound[i]);
+            }
+        }
+        //RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "played", -1);
+        //RpcDisableCards();
     }
 
     [ClientRpc]
-    void RpcShowCards(GameObject card, int cardNumber, string type, int rowIndex) 
+    void RpcShowCards(GameObject card, int cardNumber, string type, int rowIndex)
     {
         if (type == "dealt")
         {
-            if(rowIndex < 0) 
+            if (rowIndex < 0)
             {
-                if(hasAuthority) 
+                if (hasAuthority)
                 {
                     card.transform.SetParent(PlayerArea.transform, false);
                     card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
                     CardsInHand.Add(card);
                 }
-            } 
+            }
             else
             {
                 GameObject row = Rows[rowIndex];
@@ -134,16 +147,27 @@ public class PlayerManager : NetworkBehaviour
         }
         else if (type == "played")
         {
-            //card.transform.SetParent(PlayedCards.transform, false);
+            // TODO: logic
+            CardManager.PlayCard(card);
+            Debug.Log(CardManager.CardsPlayedThisRound.Count);
+            Debug.Log(numberOfPlayers);
+            Debug.Log(CardManager.CardsPlayedThisRound.Count >= numberOfPlayers);
+            //if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
+            //{
+            //    //for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
+            //    //{
+            //    //    Debug.Log(CardManager.CardsPlayedThisRound[i]);
+            //    
+            //}
         }
     }
 
     [ClientRpc]
-    void RpcDisableCards() 
+    void RpcDisableCards()
     {
-        if(hasAuthority)
+        if (hasAuthority)
         {
-            foreach(GameObject card in CardsInHand) 
+            foreach (GameObject card in CardsInHand)
             {
                 card.GetComponent<DragDrop>().isDraggable = false;
             }
