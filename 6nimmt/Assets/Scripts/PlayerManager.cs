@@ -118,33 +118,43 @@ public class PlayerManager : NetworkBehaviour
 
         if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
         {
-            CardManager.CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber);
+            RpcPlaceCards();
+            CardManager.CardsPlayedThisRound.Clear();
+        }
 
-            for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
+    }
+
+    [ClientRpc]
+    void RpcPlaceCards()
+    {
+        CardManager.CardsPlayedThisRound.OrderByDescending(Card => Card.GetComponent<CardInfo>().CardNumber);
+
+        for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
+        {
+            GameObject card = CardManager.CardsPlayedThisRound[i];
+            int lowestDiff = 999999999;
+            int lowestDiffIndex = -1;
+            for (int j = 0; j < CardManager.Rows.Count; j++)
             {
-                // foreach(Mirror.NetworkIdentity networkIdentity in clients[i].clientOwnedObjects) {
-                //     if (networkIdentity.gameObject == card) {
-                //         Debug.Log(networkIdentity.gameObject.GetComponent<CardInfo>().CardNumber);
-
-                //     }
-                // }
-
-                int lowestDiff = 999999999;
-                int lowestDiffIndex = -1;
-                for (int j = 0; j < CardManager.Rows.Count; j++) {
-                    int currentDiff = CardManager.Rows[j].GetComponent<RowManager>().GetDifference(card.GetComponent<CardInfo>().CardNumber);
-                    if (currentDiff < lowestDiff)
-                    {
-                        lowestDiff = currentDiff;
-                        lowestDiffIndex = j;
-                    }
+                int currentDiff = CardManager.Rows[j].GetComponent<RowManager>().GetDifference(card.GetComponent<CardInfo>().CardNumber);
+                if (currentDiff < lowestDiff)
+                {
+                    lowestDiff = currentDiff;
+                    lowestDiffIndex = j;
                 }
-                Debug.Log(lowestDiffIndex);
-                
+            }
+            if (lowestDiffIndex != -1)
+            {
+                if (CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().IsFull)
+                {
+                    //card.Value.TakeRow(CardManager.Rows[lowestDiffIndex]);
+                    // Punten + nieuwe kaart in rij leggen
+                }
+                CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().AddCardToRow(card);
+                RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "played", lowestDiffIndex);
+
             }
         }
-        //RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "played", -1);
-        //RpcDisableCards();
     }
 
     [ClientRpc]
@@ -171,18 +181,9 @@ public class PlayerManager : NetworkBehaviour
         }
         else if (type == "played")
         {
-            // TODO: logic
-            CardManager.PlayCard(card);
-            Debug.Log(CardManager.CardsPlayedThisRound.Count);
-            Debug.Log(numberOfPlayers);
-            Debug.Log(CardManager.CardsPlayedThisRound.Count >= numberOfPlayers);
-            //if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
-            //{
-            //    //for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
-            //    //{
-            //    //    Debug.Log(CardManager.CardsPlayedThisRound[i]);
-            //    
-            //}
+            card.transform.SetParent(Rows[rowIndex].transform, false);
+            card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
+            card.GetComponent<DragDrop>().isDraggable = false;
         }
     }
 

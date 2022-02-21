@@ -6,6 +6,11 @@ public class RowManager : MonoBehaviour
 {
     public List<GameObject> CardsInRow = new List<GameObject>();
 
+    public bool IsFull
+    {
+        get { return CardsInRow.Count == 5; }
+    }
+
     public void AddCardToRow(GameObject card) 
     {
         CardsInRow.Add(card);
