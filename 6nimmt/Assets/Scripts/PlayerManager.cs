@@ -52,7 +52,11 @@ public class PlayerManager : NetworkBehaviour
         base.OnStartServer();
         CardManager = Instantiate(CardManagerPrefab, new Vector2(0,0), Quaternion.identity);
         CardManager.InstantiateRows();
-        DealRowCards();
+        if(!RowCardsDealt.RowCardsAreDealt)
+        {
+            DealRowCards();
+            RowCardsDealt.RowCardsAreDealt = true;
+        }
     }
 
     public void DealRowCards() 
@@ -130,7 +134,7 @@ public class PlayerManager : NetworkBehaviour
         }
         else if (type == "played")
         {
-            card.transform.SetParent(PlayedCards.transform, false);
+            //card.transform.SetParent(PlayedCards.transform, false);
         }
     }
 

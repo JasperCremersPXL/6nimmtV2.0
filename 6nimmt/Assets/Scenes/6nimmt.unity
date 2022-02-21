@@ -1387,7 +1387,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1458782524613370169, guid: 5252d4bb2eee2bd46a352830bbd73b47, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3060537806384557048, guid: 5252d4bb2eee2bd46a352830bbd73b47, type: 3}
       propertyPath: DropZone
