@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CardManager : MonoBehaviour
 {
-    public Dictionary<int, GameObject> dealtCards = new Dictionary<int, GameObject>();
+    public static Dictionary<int, GameObject> dealtCards = new Dictionary<int, GameObject>();
     public List<GameObject> CardsPlayedThisRound = new List<GameObject>();
     public List<GameObject> Rows;
 

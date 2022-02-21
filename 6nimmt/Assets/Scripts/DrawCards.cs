@@ -10,7 +10,7 @@ public class DrawCards : NetworkBehaviour
     public void OnClick() 
     {
         NetworkIdentity networkIdentity = NetworkClient.connection.identity;
-        PlayerManager = networkIdentity.GetComponent<PlayerManager>();
+        PlayerManager = networkIdentity.GetComponent<PlayerManager>();  
         //Debug.Log(PlayerManager.dealtCards.Count);
         PlayerManager.CmdDealCards();
     }

@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/6nimmt.unity
     guid: 4168166a97893041680ab4aff2cfaa54
+  - enabled: 0
+    path: Assets/Scenes/MainMenu.unity
+    guid: 2f2a4210c9d778886ac89cb2eaa7d5ff
   m_configObjects: {}
