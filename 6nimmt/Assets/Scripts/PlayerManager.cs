@@ -25,6 +25,7 @@ public class PlayerManager : NetworkBehaviour
     private bool cardsDealt = false;
     private static int numberOfPlayers = 0;
     private static List<int> chosenCards = new List<int>();
+    private static List<Mirror.NetworkConnection> clients = new List<Mirror.NetworkConnection>();
 
     public override void OnStartClient()
     {
@@ -48,6 +49,8 @@ public class PlayerManager : NetworkBehaviour
             CmdGetRowCards();
         }
         numberOfPlayers++;
+
+        clients.Add(connectionToClient);
     }
 
     [Server]
@@ -116,7 +119,21 @@ public class PlayerManager : NetworkBehaviour
         {
             for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
             {
-                Debug.Log(CardManager.CardsPlayedThisRound[i]);
+                // Debug.Log(CardManager.CardsPlayedThisRound[i]);
+                // foreach(var obj in connectionToClient.clientOwnedObjects) {
+                //     Debug.Log(obj);
+                // }
+                Debug.Log(card);
+                foreach(var obj in clients[i].clientOwnedObjects) {
+                    // Debug.Log(obj.GetComponents<Component>());
+                    foreach (var component in obj.GetComponents<Component>()) {
+                        Debug.Log(component.GetComponent<CardInfo>());
+                    }
+                    
+                    // if (obj.GetComponent<CardInfo>().CardNumber == card.GetComponent<CardInfo>().CardNumber) {
+                    //     Debug.Log("test");
+                    // }
+                }
             }
         }
         //RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "played", -1);
