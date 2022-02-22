@@ -2147,6 +2147,7 @@ MonoBehaviour:
   playArea3: {fileID: 432683611}
   players: {fileID: 1319898354}
   passingCanvas: {fileID: 24984981}
+  animationsController: {fileID: 765832528}
   playAgainCanvas: {fileID: 434025661}
 --- !u!4 &765832527
 Transform:

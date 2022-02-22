@@ -14,18 +14,6 @@ public class MainMenuController : MonoBehaviour
 
     public static List<Player> players = new List<Player>();
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void AddInputField()
     {
         if (inputFields.transform.childCount < 10)
@@ -58,6 +46,6 @@ public class MainMenuController : MonoBehaviour
             popupNotEnoughPlayers.gameObject.SetActive(true);
             return;
         }
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene("SampleScene");
     }
 }

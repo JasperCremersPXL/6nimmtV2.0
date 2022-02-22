@@ -27,7 +27,7 @@ public class Player
         _cardObjects = new List<GameObject>();
     }
 
-    public void LoadCards()
+    public void LoadCards(AnimationsController animationsController)
     {
         for (int i = 0; i < CardsInHand.Count; i++)
         {
@@ -39,12 +39,18 @@ public class Player
             boxCollider2d.size = new Vector2(8f, 8f);
             SetCardTexture(current.CardNumber, cardObject);
             _cardObjects.Add(cardObject);
+            animationsController.AddAnimation(new LocalPositionAnimation(
+                    cardObject, 
+                    Vector3.zero, 
+                    new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0),
+                    1f
+                ));
             cardObject.transform.localScale = new Vector3(16.5f, 16.75f, 0f);
-            cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
+            //cardObject.transform.localPosition = new Vector3(PlayerCardPositions[i].x, _playerAreaOffsetY, 0);
         }
     }
 
-    public void TakeRow(Row row) 
+    public void TakeRow(Row row)
     {
         _cardsTaken.AddRange(row.CardList);
         row.CardList.Clear();
@@ -53,7 +59,7 @@ public class Player
 
     public void UpdateScore()
     {
-        if(_cardsTaken.Count == 0) 
+        if (_cardsTaken.Count == 0)
         {
             return;
         }
@@ -66,7 +72,7 @@ public class Player
 
     public void isDone()
     {
-        foreach(var cardObject in _cardObjects)
+        foreach (var cardObject in _cardObjects)
         {
             GameObject.Destroy(cardObject);
         }
@@ -80,7 +86,7 @@ public class Player
 
     private void SetCardTexture(int number, GameObject cardObject)
     {
-        Texture2D texture = cards.cards[number-1];
+        Texture2D texture = cards.cards[number - 1];
         cardObject.AddComponent<SpriteRenderer>();
         cardObject.GetComponent<SpriteRenderer>().sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         cardObject.GetComponent<SpriteRenderer>().sortingLayerName = _layerName;

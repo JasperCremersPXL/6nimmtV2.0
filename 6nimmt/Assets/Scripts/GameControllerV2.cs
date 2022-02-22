@@ -24,6 +24,7 @@ namespace Assets.Scripts
         public GameObject playArea3;
         public GameObject players;
         public PassingCanvasController passingCanvas;
+        public AnimationsController animationsController;
         public Canvas playAgainCanvas;
 
         private List<Card> _dealtCards;
@@ -80,7 +81,7 @@ namespace Assets.Scripts
                     ResetRound();
                     currentPlayerIndex = 0;
                     currentPlayer = playerList[currentPlayerIndex];
-                    currentPlayer.LoadCards();
+                    currentPlayer.LoadCards(animationsController);
                     // stop if
                     _isHandDealt = true;
                 }
@@ -175,7 +176,7 @@ namespace Assets.Scripts
         public void NextPlayerTurn()
         {
             passingCanvas.gameObject.SetActive(false);
-            currentPlayer.LoadCards();
+            currentPlayer.LoadCards(animationsController);
             foreach(var row in rows)
             {
                 row.LoadCards();
