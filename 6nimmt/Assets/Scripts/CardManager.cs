@@ -1,3 +1,4 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,7 @@ public class CardManager : MonoBehaviour
 {
     public static Dictionary<int, GameObject> dealtCards = new Dictionary<int, GameObject>();
     public static List<GameObject> CardsPlayedThisRound = new List<GameObject>();
-    public List<GameObject> Rows;
+    public static List<GameObject> Rows;
 
     // Start is called before the first frame update
     void Start()

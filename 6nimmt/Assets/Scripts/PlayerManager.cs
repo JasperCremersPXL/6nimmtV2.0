@@ -42,6 +42,7 @@ public class PlayerManager : NetworkBehaviour
         Rows.Add(Row2);
         Rows.Add(Row3);
         Rows.Add(Row4);
+
         DropZone = GameObject.Find("DropZone");
         PlayedCards = GameObject.Find("PlayedCards");
         CardsInHand = new List<GameObject>();
@@ -82,6 +83,7 @@ public class PlayerManager : NetworkBehaviour
     [Command]
     public void CmdGetRowCards()
     {
+        Debug.Log(CardManager.Rows.Count);
         for (int i = 0; i < CardManager.Rows.Count; i++)
         {
             foreach (var card in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
@@ -116,12 +118,13 @@ public class PlayerManager : NetworkBehaviour
     void CmdPlayCard(GameObject card)
     {
         CardManager.PlayCard(card);
-
+        Debug.Log(CardManager.CardsPlayedThisRound.Count);
         if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
         {
             CardManager.CardsPlayedThisRound.OrderByDescending(Card => Card.GetComponent<CardInfo>().CardNumber);
 
             for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
+
             {
                 card = CardManager.CardsPlayedThisRound[i];
                 int lowestDiff = 999999999;
@@ -205,6 +208,7 @@ public class PlayerManager : NetworkBehaviour
             }
             else
             {
+                Debug.Log(rowIndex);
                 GameObject row = Rows[rowIndex];
                 card.transform.SetParent(row.transform, false);
                 card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
