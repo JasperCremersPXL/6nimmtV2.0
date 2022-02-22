@@ -118,7 +118,6 @@ public class PlayerManager : NetworkBehaviour
     void CmdPlayCard(GameObject card)
     {
         CardManager.PlayCard(card);
-        Debug.Log(CardManager.CardsPlayedThisRound.Count);
         if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
         {
             CardManager.CardsPlayedThisRound.OrderByDescending(Card => Card.GetComponent<CardInfo>().CardNumber);
