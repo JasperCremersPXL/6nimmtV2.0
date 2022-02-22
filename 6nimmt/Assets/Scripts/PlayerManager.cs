@@ -58,7 +58,8 @@ public class PlayerManager : NetworkBehaviour
     public override void OnStartServer()
     {
         base.OnStartServer();
-        CardManager = Instantiate(CardManagerPrefab, new Vector2(0, 0), Quaternion.identity);
+        //CardManager = Instantiate(CardManagerPrefab, new Vector2(0, 0), Quaternion.identity);
+        CardManager = GameObject.Find("CardManager").GetComponent<CardManager>();
         CardManager.InstantiateRows();
         if (!RowCardsDealt.RowCardsAreDealt)
         {
@@ -118,44 +119,75 @@ public class PlayerManager : NetworkBehaviour
 
         if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
         {
-            RpcPlaceCards();
-            CardManager.CardsPlayedThisRound.Clear();
-        }
+            CardManager.CardsPlayedThisRound.OrderByDescending(Card => Card.GetComponent<CardInfo>().CardNumber);
 
+            for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
+            {
+                card = CardManager.CardsPlayedThisRound[i];
+                int lowestDiff = 999999999;
+                int lowestDiffIndex = -1;
+                for (int j = 0; j < CardManager.Rows.Count; j++)
+                {
+                    int currentDiff = CardManager.Rows[j].GetComponent<RowManager>().GetDifference(card.GetComponent<CardInfo>().CardNumber);
+                    if (currentDiff < lowestDiff)
+                    {
+                        lowestDiff = currentDiff;
+                        lowestDiffIndex = j;
+                    }
+                }
+                if (lowestDiffIndex != -1)
+                {
+                    if (CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().IsFull)
+                    {
+                        //card.Value.TakeRow(CardManager.Rows[lowestDiffIndex]);
+                        // Punten + nieuwe kaart in rij leggen
+                    }
+                    CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().AddCardToRow(card);
+                    //RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "played", lowestDiffIndex);
+                }
+            }
+            for (int i = 0; i < CardManager.Rows.Count; i++) {
+                foreach (var obj in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
+                {
+                    RpcPlaceCards(obj, $"Row{i+1}", card.GetComponent<CardInfo>().CardNumber);
+                }
+            }
+        }
     }
+
+    //[ClientRpc]
+    //void RpcPlaceCards(List<GameObject> rows)
+    //{
+    //    Debug.Log("In RPC");
+    //    Debug.Log(rows[0].GetComponent<RowManager>().CardsInRow.Count);
+    //    Rows = rows;
+
+    //    for (int i = 0; i < rows.Count; i++)
+    //    {
+    //        Debug.Log(rows[i].GetComponent<RowManager>().CardsInRow.Count);
+    //        foreach (var card in rows[i].GetComponent<RowManager>().CardsInRow)
+    //        {
+    //            GameObject row = rows[i];
+    //            card.transform.SetParent(row.transform, false);
+    //            Debug.Log(card.GetComponent<CardInfo>().CardNumber);
+    //            card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{card.GetComponent<CardInfo>().CardNumber}");
+    //            card.GetComponent<DragDrop>().isDraggable = false;
+    //        }
+    //    }
+    //}
 
     [ClientRpc]
-    void RpcPlaceCards()
+    void RpcPlaceCards(GameObject card, string rowId, int cardNumber)
     {
-        CardManager.CardsPlayedThisRound.OrderByDescending(Card => Card.GetComponent<CardInfo>().CardNumber);
-
-        for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
-        {
-            GameObject card = CardManager.CardsPlayedThisRound[i];
-            int lowestDiff = 999999999;
-            int lowestDiffIndex = -1;
-            for (int j = 0; j < CardManager.Rows.Count; j++)
-            {
-                int currentDiff = CardManager.Rows[j].GetComponent<RowManager>().GetDifference(card.GetComponent<CardInfo>().CardNumber);
-                if (currentDiff < lowestDiff)
-                {
-                    lowestDiff = currentDiff;
-                    lowestDiffIndex = j;
-                }
-            }
-            if (lowestDiffIndex != -1)
-            {
-                if (CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().IsFull)
-                {
-                    //card.Value.TakeRow(CardManager.Rows[lowestDiffIndex]);
-                    // Punten + nieuwe kaart in rij leggen
-                }
-                CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().AddCardToRow(card);
-                RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "played", lowestDiffIndex);
-
-            }
-        }
+        //Debug.Log("In RPC");
+        //Debug.Log(rows[0].GetComponent<RowManager>().CardsInRow.Count);
+        //Rows = rows;  
+        GameObject row = GameObject.Find(rowId);
+        card.transform.SetParent(row.transform, false);
+        card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
+        card.GetComponent<DragDrop>().isDraggable = false;
     }
+
 
     [ClientRpc]
     void RpcShowCards(GameObject card, int cardNumber, string type, int rowIndex)
