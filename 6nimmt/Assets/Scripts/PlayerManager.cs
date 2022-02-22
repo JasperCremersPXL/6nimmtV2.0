@@ -152,39 +152,15 @@ public class PlayerManager : NetworkBehaviour
             for (int i = 0; i < CardManager.Rows.Count; i++) {
                 foreach (var obj in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
                 {
-                    RpcPlaceCards(obj, $"Row{i+1}", card.GetComponent<CardInfo>().CardNumber);
+                    RpcPlaceCards(obj, $"Row{i+1}", obj.GetComponent<CardInfo>().CardNumber);
                 }
             }
         }
     }
 
-    //[ClientRpc]
-    //void RpcPlaceCards(List<GameObject> rows)
-    //{
-    //    Debug.Log("In RPC");
-    //    Debug.Log(rows[0].GetComponent<RowManager>().CardsInRow.Count);
-    //    Rows = rows;
-
-    //    for (int i = 0; i < rows.Count; i++)
-    //    {
-    //        Debug.Log(rows[i].GetComponent<RowManager>().CardsInRow.Count);
-    //        foreach (var card in rows[i].GetComponent<RowManager>().CardsInRow)
-    //        {
-    //            GameObject row = rows[i];
-    //            card.transform.SetParent(row.transform, false);
-    //            Debug.Log(card.GetComponent<CardInfo>().CardNumber);
-    //            card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{card.GetComponent<CardInfo>().CardNumber}");
-    //            card.GetComponent<DragDrop>().isDraggable = false;
-    //        }
-    //    }
-    //}
-
     [ClientRpc]
     void RpcPlaceCards(GameObject card, string rowId, int cardNumber)
-    {
-        //Debug.Log("In RPC");
-        //Debug.Log(rows[0].GetComponent<RowManager>().CardsInRow.Count);
-        //Rows = rows;  
+    {  
         GameObject row = GameObject.Find(rowId);
         card.transform.SetParent(row.transform, false);
         card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
@@ -208,7 +184,6 @@ public class PlayerManager : NetworkBehaviour
             }
             else
             {
-                Debug.Log(rowIndex);
                 GameObject row = Rows[rowIndex];
                 card.transform.SetParent(row.transform, false);
                 card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
