@@ -122,7 +122,7 @@ namespace Assets.Scripts
                     activePlayerText.text = currentPlayer.Name;
                     activePlayerScore.text = $"Score: {currentPlayer.Score}";
                     ClickUtil.PrevGameObject = null;
-                    passingCanvas.gameObject.SetActive(true);
+                    passingCanvas.AddCanvas();
                     passingCanvas.SetPlayerName(currentPlayer.Name);
                 }
                 _isPassing = false;
@@ -175,7 +175,7 @@ namespace Assets.Scripts
 
         public void NextPlayerTurn()
         {
-            passingCanvas.gameObject.SetActive(false);
+            passingCanvas.RemoveCanvas();
             currentPlayer.LoadCards(animationsController);
             foreach(var row in rows)
             {
