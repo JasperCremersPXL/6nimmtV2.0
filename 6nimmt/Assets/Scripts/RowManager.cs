@@ -1,10 +1,11 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RowManager : MonoBehaviour
+public class RowManager : NetworkBehaviour
 {
-    public List<GameObject> CardsInRow = new List<GameObject>();
+    public readonly SyncList<GameObject> CardsInRow = new SyncList<GameObject>();
 
     public bool IsFull
     {
@@ -13,6 +14,7 @@ public class RowManager : MonoBehaviour
 
     public void AddCardToRow(GameObject card) 
     {
+        Debug.Log("test");
         CardsInRow.Add(card);
     }
 

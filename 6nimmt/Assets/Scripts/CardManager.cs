@@ -1,12 +1,13 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardManager : MonoBehaviour
+public class CardManager : NetworkBehaviour
 {
     public static Dictionary<int, GameObject> dealtCards = new Dictionary<int, GameObject>();
-    public static List<GameObject> CardsPlayedThisRound = new List<GameObject>();
-    public List<GameObject> Rows;
+    public readonly SyncList<GameObject> CardsPlayedThisRound = new SyncList<GameObject>();
+    public readonly SyncList<GameObject> Rows = new SyncList<GameObject>();
 
     // Start is called before the first frame update
     void Start()
@@ -15,7 +16,6 @@ public class CardManager : MonoBehaviour
 
     public void InstantiateRows() 
     {
-        Rows = new List<GameObject>();
         Rows.Add(GameObject.Find("Row1"));
         Rows.Add(GameObject.Find("Row2"));
         Rows.Add(GameObject.Find("Row3"));

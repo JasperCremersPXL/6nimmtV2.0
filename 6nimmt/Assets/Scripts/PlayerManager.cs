@@ -115,11 +115,11 @@ public class PlayerManager : NetworkBehaviour
     void CmdPlayCard(GameObject card)
     {
         CardManager.PlayCard(card);
-
+        Debug.Log(CardManager.CardsPlayedThisRound.Count);
         if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
         {
             RpcPlaceCards();
-            CardManager.CardsPlayedThisRound.Clear();
+            //CardManager.CardsPlayedThisRound.Clear(); => delay on RPC method DO NOT clear
         }
 
     }
@@ -128,12 +128,15 @@ public class PlayerManager : NetworkBehaviour
     void RpcPlaceCards()
     {
         CardManager.CardsPlayedThisRound.OrderByDescending(Card => Card.GetComponent<CardInfo>().CardNumber);
+        Debug.Log("outer for");
+        Debug.Log(CardManager.CardsPlayedThisRound.Count);
 
         for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
         {
             GameObject card = CardManager.CardsPlayedThisRound[i];
             int lowestDiff = 999999999;
             int lowestDiffIndex = -1;
+            Debug.Log("inner for");
             for (int j = 0; j < CardManager.Rows.Count; j++)
             {
                 int currentDiff = CardManager.Rows[j].GetComponent<RowManager>().GetDifference(card.GetComponent<CardInfo>().CardNumber);
