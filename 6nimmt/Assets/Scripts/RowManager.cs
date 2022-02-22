@@ -14,12 +14,27 @@ public class RowManager : MonoBehaviour
 
     public void AddCardToRow(GameObject card) 
     {
-        Debug.Log("test");
+        CardsInRow.Add(card);
+    }
+
+    public void ClearRowAndAddCard(GameObject card)
+    {
+        CardsInRow.Clear();
         CardsInRow.Add(card);
     }
 
     public int GetDifference(int playedCard)
     {
         return CardsInRow[CardsInRow.Count - 1].GetComponent<CardInfo>().CardNumber > playedCard ? 999999999 : playedCard - CardsInRow[CardsInRow.Count - 1].GetComponent<CardInfo>().CardNumber;
+    }
+
+    public int GetRowScore()
+    {
+        int score = 0;
+        foreach (var card in CardsInRow)
+        {
+            score += CardInfo.CalculateCardTriangles(card.GetComponent<CardInfo>().CardNumber);
+        }
+        return score;
     }
 }

@@ -142,31 +142,63 @@ public class PlayerManager : NetworkBehaviour
                 {
                     if (CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().IsFull)
                     {
-                        //card.Value.TakeRow(CardManager.Rows[lowestDiffIndex]);
-                        // Punten + nieuwe kaart in rij leggen
+                        // Punten
+                        CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
+                        RpcDestroyCardsInRow($"Row{lowestDiffIndex + 1}");
                     }
                     CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().AddCardToRow(card);
-                    //RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "played", lowestDiffIndex);
+                }
+                else
+                {
+                    int lowestScore = 150;
+                    int lowestScoreIndex = -1;
+                    for (int j = 0; j < CardManager.Rows.Count; j++)
+                    {
+                        int rowScore = CardManager.Rows[j].GetComponent<RowManager>().GetRowScore();
+                        
+                        if (rowScore < lowestScore)
+                        {
+                            lowestScore = rowScore;
+                            lowestScoreIndex = j;
+                        }
+                    }
+                    Debug.Log($"player ... had to take row {lowestScoreIndex + 1}");
+                    CardManager.Rows[lowestScoreIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
+                    RpcDestroyCardsInRow($"Row{lowestScoreIndex+1}");
+                    //playedCard.Value.TakeRow(CardManager.Rows[lowestScoreIndex]);
+                    //CardManager.Rows[lowestScoreIndex].AddCardToCardList(_deck[playedCard.Key - 1]);
+                    //CardManager.Rows[lowestScoreIndex].LoadCards();
                 }
             }
-            for (int i = 0; i < CardManager.Rows.Count; i++) {
+            for (int i = 0; i < CardManager.Rows.Count; i++)
+            {
                 foreach (var obj in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
                 {
-                    RpcPlaceCards(obj, $"Row{i+1}", obj.GetComponent<CardInfo>().CardNumber);
+                    RpcPlaceCards(obj, $"Row{i + 1}", obj.GetComponent<CardInfo>().CardNumber);
                 }
             }
+            CardManager.CardsPlayedThisRound.Clear();
         }
     }
 
     [ClientRpc]
     void RpcPlaceCards(GameObject card, string rowId, int cardNumber)
-    {  
+    {
         GameObject row = GameObject.Find(rowId);
         card.transform.SetParent(row.transform, false);
         card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
         card.GetComponent<DragDrop>().isDraggable = false;
     }
 
+    [ClientRpc]
+    void RpcDestroyCardsInRow(string rowId)
+    {
+        GameObject row = GameObject.Find(rowId);
+        for (int i = 0; i < row.transform.childCount;i++)
+        {
+            Destroy(row.transform.GetChild(i).gameObject);
+        }
+    }
 
     [ClientRpc]
     void RpcShowCards(GameObject card, int cardNumber, string type, int rowIndex)
