@@ -257,7 +257,7 @@ namespace Assets.Scripts
         public void PlayAgain()
         {
             playAgainCanvas.gameObject.SetActive(false);
-            SceneManager.LoadScene(0);
+            SceneManager.LoadScene("MainMenu");
         }
 
         public void UpdatePlayerScores()
