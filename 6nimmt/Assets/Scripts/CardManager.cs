@@ -33,10 +33,10 @@ public class CardManager : MonoBehaviour
 
     public int GetCardNumber(GameObject card) 
     {
-        int cardNumber = Random.Range(1,30);
+        int cardNumber = Random.Range(1,105);
         while(dealtCards.ContainsKey(cardNumber)) 
         {
-            cardNumber = Random.Range(1,30);
+            cardNumber = Random.Range(1,105);
         }
         dealtCards.Add(cardNumber, card);
         card.GetComponent<CardInfo>().CardNumber = cardNumber;

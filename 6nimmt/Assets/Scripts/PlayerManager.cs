@@ -29,19 +29,27 @@ public class PlayerManager : NetworkBehaviour
     private static Dictionary<NetworkConnection, GameObject> connectionScoreManagers = new Dictionary<NetworkConnection, GameObject>();
     private static int totalHandsPlayed;
     private bool gameOver = false;
-
     private bool connectionAdded = false;
+    private bool cardsAreSorted = false;
 
     [Server]
     void Update() {
+        //  if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers && !cardsAreSorted) {
+        //     CardManager.CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber);
+        //     cardsAreSorted = true;
+        //  }
+        // Debug.Log(CardManager.CardsPlayedThisRound.Count);
         // TODO op 10 zetten
-            // if (totalHandsPlayed == 10) {
-            if (totalHandsPlayed == 3) {
-                // check if score > 60
-                // Game is over
-                // RpcSetAllClientsCardsDealtsStatus(false);
-
-                // loop alle connecties connectie.cardsDealt = false
+        if (!gameOver) {
+            if (totalHandsPlayed == 10) {
+                var values = connectionScoreManagers.Values;
+                foreach(GameObject score in values) {
+                    if (score.GetComponent<ScoreManager>().Score >= 5) {
+                        Debug.Log("LOSER");
+                        gameOver = true;
+                        return;
+                    }
+                }
 
                 var players = FindObjectsOfType<PlayerManager>(); 
                 foreach(PlayerManager player in players) {
@@ -60,10 +68,13 @@ public class PlayerManager : NetworkBehaviour
                     DealRowCards();
                     RowCardsDealt.RowCardsAreDealt = true;
                 }
-                // CmdDealCards();
                 CmdGetRowCards();
                 totalHandsPlayed = 0;
             }
+        } else {
+            Debug.Log("FINALLY");
+        }
+            
     }
 
     public override void OnStartClient()
@@ -124,7 +135,7 @@ public class PlayerManager : NetworkBehaviour
     [Command]
     public void CmdGetRowCards()
     {
-        Debug.Log(CardManager.Rows.Count);
+        // Debug.Log(CardManager.Rows.Count);
         for (int i = 0; i < CardManager.Rows.Count; i++)
         {
             foreach (var card in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
@@ -160,8 +171,8 @@ public class PlayerManager : NetworkBehaviour
         if (!cardsDealt)
         {
             //TODO op 10 zetten
-            // for (int j = 0; j < 10; j++)
-            for (int j = 0; j < 3; j++)
+            for (int j = 0; j < 10; j++)
+            // for (int j = 0; j < 3; j++)
             {
                 GameObject card = Instantiate(Card, new Vector2(0, 0), Quaternion.identity);
                 int cardNumber = CardManager.GetCardNumber(card);
@@ -181,13 +192,20 @@ public class PlayerManager : NetworkBehaviour
         CmdPlayCard(card);
     }
 
+    public void SortCards() {
+        CardManager.CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber);
+
+        foreach(GameObject card in CardManager.CardsPlayedThisRound) {
+            Debug.Log(card.GetComponent<CardInfo>().CardNumber);
+        }
+    }
+
     [Command]
     void CmdPlayCard(GameObject card)
     {
+        SortCards();
         CardManager.PlayCard(card);
-        if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
-        {
-            CardManager.CardsPlayedThisRound.OrderByDescending(Card => Card.GetComponent<CardInfo>().CardNumber);
+        if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers) {
             while(CardManager.CardsPlayedThisRound.Count > 0)
             {
                 card = CardManager.CardsPlayedThisRound[0];
@@ -211,7 +229,7 @@ public class PlayerManager : NetworkBehaviour
                         // Punten
                         CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
 
-                        Debug.Log(card.GetComponent<CardInfo>().connectionToClient);
+                        // Debug.Log(card.GetComponent<CardInfo>().connectionToClient);
                         var value = connectionScoreManagers[card.GetComponent<CardInfo>().connectionToClient];
                         ScoreManager scoreManager = value.GetComponent<ScoreManager>();
                         RpcUpdateScore(card.GetComponent<CardInfo>().connectionToClient, scoreManager, score);
@@ -239,7 +257,7 @@ public class PlayerManager : NetworkBehaviour
 
                     CardManager.Rows[lowestScoreIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
 
-                    Debug.Log(card.GetComponent<CardInfo>().connectionToClient);
+                    // Debug.Log(card.GetComponent<CardInfo>().connectionToClient);
                     var value = connectionScoreManagers[card.GetComponent<CardInfo>().connectionToClient];
                     ScoreManager scoreManager = value.GetComponent<ScoreManager>();
                     RpcUpdateScore(card.GetComponent<CardInfo>().connectionToClient, scoreManager, lowestScore);
@@ -254,7 +272,8 @@ public class PlayerManager : NetworkBehaviour
                 }
             }
             totalHandsPlayed++;
-        }
+            // cardsAreSorted = false;
+        }    
     }
 
     // [Command]
@@ -271,10 +290,10 @@ public class PlayerManager : NetworkBehaviour
 
     [ClientRpc]
     void RpcSetAllClientsCardsDealtsStatus(bool status) {
-        Debug.Log("test");
-        Debug.Log(cardsDealt); //false
+        // Debug.Log("test");
+        // Debug.Log(cardsDealt); //false
         cardsDealt = status;
-        Debug.Log(cardsDealt); //true   
+        // Debug.Log(cardsDealt); //true   
 
     }
 
