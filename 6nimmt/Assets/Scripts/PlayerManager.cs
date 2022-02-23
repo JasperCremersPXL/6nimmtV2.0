@@ -22,14 +22,12 @@ public class PlayerManager : NetworkBehaviour
     public List<GameObject> CardsInHand;
     public List<GameObject> Rows;
     public Text ScoreText;
-
     public GameObject ScoreManager;
-
     private bool cardsDealt = false;
     private static int numberOfPlayers = 0;
-    private static List<int> chosenCards = new List<int>();
-    private static List<Mirror.NetworkConnection> clients = new List<Mirror.NetworkConnection>();
-    private Dictionary<NetworkConnection, GameObject> connectionScoreManagers = new Dictionary<NetworkConnection, GameObject>();
+    // private static List<int> chosenCards = new List<int>();
+    // private static List<Mirror.NetworkConnection> clients = new List<Mirror.NetworkConnection>();
+    private static Dictionary<NetworkConnection, GameObject> connectionScoreManagers = new Dictionary<NetworkConnection, GameObject>();
 
     public override void OnStartClient()
     {
@@ -55,7 +53,7 @@ public class PlayerManager : NetworkBehaviour
         }
         numberOfPlayers++;
 
-        clients.Add(connectionToClient);
+        // clients.Add(connectionToClient);
 
         ScoreText = GameObject.Find("ScoreText").GetComponent<Text>();
     }
@@ -112,6 +110,7 @@ public class PlayerManager : NetworkBehaviour
             {
                 GameObject card = Instantiate(Card, new Vector2(0, 0), Quaternion.identity);
                 int cardNumber = CardManager.GetCardNumber(card);
+                card.GetComponent<CardInfo>().connectionToClient = connectionToClient;
                 NetworkServer.Spawn(card, connectionToClient);
                 RpcShowCards(card, cardNumber, "dealt", -1);
             }
@@ -154,7 +153,7 @@ public class PlayerManager : NetworkBehaviour
                         // Punten
                         CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
 
-                        RpcDestroyCardsInRow($"Row{lowestDiffIndex + 1}", score);
+                        RpcDestroyCardsInRow($"Row{lowestDiffIndex + 1}");
                     }
                     CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().AddCardToRow(card);
                 }
@@ -176,7 +175,12 @@ public class PlayerManager : NetworkBehaviour
                     Debug.Log($"player ... had to take row {lowestScoreIndex + 1}");
 
                     CardManager.Rows[lowestScoreIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
-                    RpcDestroyCardsInRow($"Row{lowestScoreIndex+1}", lowestScore);
+
+                    Debug.Log(card.GetComponent<CardInfo>().connectionToClient);
+                    var value = connectionScoreManagers[card.GetComponent<CardInfo>().connectionToClient];
+                    ScoreManager scoreManager = value.GetComponent<ScoreManager>();
+                    RpcUpdateScore(card.GetComponent<CardInfo>().connectionToClient, scoreManager, lowestScore);
+                    RpcDestroyCardsInRow($"Row{lowestScoreIndex+1}");
                 }
             }
             for (int i = 0; i < CardManager.Rows.Count; i++)
@@ -190,6 +194,13 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
+    [TargetRpc]
+    void RpcUpdateScore(NetworkConnection target, ScoreManager scoreManager, int score) {
+        scoreManager.Score += score;
+        Debug.Log($"Score: {scoreManager.Score}");
+        ScoreText.text = $"Score: {scoreManager.Score}";
+    }
+
     [ClientRpc]
     void RpcPlaceCards(GameObject card, string rowId, int cardNumber)
     {
@@ -200,13 +211,9 @@ public class PlayerManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    void RpcDestroyCardsInRow(string rowId, int score)
+    void RpcDestroyCardsInRow(string rowId)
     {
         GameObject row = GameObject.Find(rowId);
-        ScoreManager.Score += score;
-        Debug.Log($"Score: {ScoreManager.Score}");
-        ScoreText.text = $"Score: {ScoreManager.Score}";
-
         for (int i = 0; i < row.transform.childCount;i++)
         {
             Destroy(row.transform.GetChild(i).gameObject);

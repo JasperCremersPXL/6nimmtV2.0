@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 public class CardInfo : MonoBehaviour
 {
     public int CardNumber;
+    public NetworkConnection connectionToClient;
 
     public static int CalculateCardTriangles(int i)
     {
