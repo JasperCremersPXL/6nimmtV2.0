@@ -8,7 +8,6 @@ using System.Linq;
 
 public class PlayerManager : NetworkBehaviour
 {
-
     public GameObject Card;
     public GameObject PlayerArea;
     public GameObject Row1;
@@ -22,11 +21,15 @@ public class PlayerManager : NetworkBehaviour
     public bool CanSelectCard = true;
     public List<GameObject> CardsInHand;
     public List<GameObject> Rows;
+    public Text ScoreText;
+
+    public GameObject ScoreManager;
 
     private bool cardsDealt = false;
     private static int numberOfPlayers = 0;
     private static List<int> chosenCards = new List<int>();
     private static List<Mirror.NetworkConnection> clients = new List<Mirror.NetworkConnection>();
+    private Dictionary<NetworkConnection, GameObject> connectionScoreManagers = new Dictionary<NetworkConnection, GameObject>();
 
     public override void OnStartClient()
     {
@@ -53,6 +56,8 @@ public class PlayerManager : NetworkBehaviour
         numberOfPlayers++;
 
         clients.Add(connectionToClient);
+
+        ScoreText = GameObject.Find("ScoreText").GetComponent<Text>();
     }
 
     [Server]
@@ -98,6 +103,11 @@ public class PlayerManager : NetworkBehaviour
     {
         if (!cardsDealt)
         {
+            GameObject scoreManager = Instantiate(ScoreManager, new Vector2(0, 0), Quaternion.identity);
+            NetworkServer.Spawn(scoreManager, connectionToClient);
+
+            connectionScoreManagers.Add(connectionToClient, scoreManager);
+
             for (int j = 0; j < 10; j++)
             {
                 GameObject card = Instantiate(Card, new Vector2(0, 0), Quaternion.identity);
@@ -140,9 +150,11 @@ public class PlayerManager : NetworkBehaviour
                 {
                     if (CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().IsFull)
                     {
+                        var score = CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().GetRowScore();
                         // Punten
                         CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
-                        RpcDestroyCardsInRow($"Row{lowestDiffIndex + 1}");
+
+                        RpcDestroyCardsInRow($"Row{lowestDiffIndex + 1}", score);
                     }
                     CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().AddCardToRow(card);
                 }
@@ -150,6 +162,7 @@ public class PlayerManager : NetworkBehaviour
                 {
                     int lowestScore = 150;
                     int lowestScoreIndex = -1;
+
                     for (int j = 0; j < CardManager.Rows.Count; j++)
                     {
                         int rowScore = CardManager.Rows[j].GetComponent<RowManager>().GetRowScore();
@@ -161,11 +174,9 @@ public class PlayerManager : NetworkBehaviour
                         }
                     }
                     Debug.Log($"player ... had to take row {lowestScoreIndex + 1}");
+
                     CardManager.Rows[lowestScoreIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
-                    RpcDestroyCardsInRow($"Row{lowestScoreIndex+1}");
-                    //playedCard.Value.TakeRow(CardManager.Rows[lowestScoreIndex]);
-                    //CardManager.Rows[lowestScoreIndex].AddCardToCardList(_deck[playedCard.Key - 1]);
-                    //CardManager.Rows[lowestScoreIndex].LoadCards();
+                    RpcDestroyCardsInRow($"Row{lowestScoreIndex+1}", lowestScore);
                 }
             }
             for (int i = 0; i < CardManager.Rows.Count; i++)
@@ -189,9 +200,13 @@ public class PlayerManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    void RpcDestroyCardsInRow(string rowId)
+    void RpcDestroyCardsInRow(string rowId, int score)
     {
         GameObject row = GameObject.Find(rowId);
+        ScoreManager.Score += score;
+        Debug.Log($"Score: {ScoreManager.Score}");
+        ScoreText.text = $"Score: {ScoreManager.Score}";
+
         for (int i = 0; i < row.transform.childCount;i++)
         {
             Destroy(row.transform.GetChild(i).gameObject);
