@@ -9,9 +9,12 @@ public class CardManager : MonoBehaviour
     public static List<GameObject> CardsPlayedThisRound = new List<GameObject>();
     public static List<GameObject> Rows;
 
-    // Start is called before the first frame update
-    void Start()
+    public void ResetRound()
     {
+        dealtCards.Clear();
+        foreach(var row in Rows) {
+            row.GetComponent<RowManager>().CardsInRow = new List<GameObject>();
+        }
     }
 
     public void InstantiateRows() 

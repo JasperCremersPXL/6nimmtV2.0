@@ -23,11 +23,48 @@ public class PlayerManager : NetworkBehaviour
     public List<GameObject> Rows;
     public Text ScoreText;
     public GameObject ScoreManager;
-    private bool cardsDealt = false;
+    public bool cardsDealt = false;
     private static int numberOfPlayers = 0;
-    // private static List<int> chosenCards = new List<int>();
-    // private static List<Mirror.NetworkConnection> clients = new List<Mirror.NetworkConnection>();
+    private static List<NetworkConnection> clients = new List<NetworkConnection>();
     private static Dictionary<NetworkConnection, GameObject> connectionScoreManagers = new Dictionary<NetworkConnection, GameObject>();
+    private static int totalHandsPlayed;
+    private bool gameOver = false;
+
+    private bool connectionAdded = false;
+
+    [Server]
+    void Update() {
+        // TODO op 10 zetten
+            // if (totalHandsPlayed == 10) {
+            if (totalHandsPlayed == 3) {
+                // check if score > 60
+                // Game is over
+                // RpcSetAllClientsCardsDealtsStatus(false);
+
+                // loop alle connecties connectie.cardsDealt = false
+
+                var players = FindObjectsOfType<PlayerManager>(); 
+                foreach(PlayerManager player in players) {
+                    player.cardsDealt = false;
+                }
+
+                // cardsDealt = false;
+                RowCardsDealt.RowCardsAreDealt = false;
+
+                RpcDestroyCardsInAllRows();
+
+                CardManager.ResetRound();
+
+                if (!RowCardsDealt.RowCardsAreDealt)
+                {
+                    DealRowCards();
+                    RowCardsDealt.RowCardsAreDealt = true;
+                }
+                // CmdDealCards();
+                CmdGetRowCards();
+                totalHandsPlayed = 0;
+            }
+    }
 
     public override void OnStartClient()
     {
@@ -53,9 +90,10 @@ public class PlayerManager : NetworkBehaviour
         }
         numberOfPlayers++;
 
-        // clients.Add(connectionToClient);
+        clients.Add(connectionToClient);
 
         ScoreText = GameObject.Find("ScoreText").GetComponent<Text>();
+        ScoreText.text = $"Score: 0";
     }
 
     [Server]
@@ -96,17 +134,34 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
+    // [Command(requiresAuthority = false)]
+    // public void CmdGetRowCardsWithoutAuthority()
+    // {
+    //     Debug.Log(CardManager.Rows.Count);
+    //     for (int i = 0; i < CardManager.Rows.Count; i++)
+    //     {
+    //         foreach (var card in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
+    //         {
+    //             RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "dealt", i);
+    //         }
+    //     }
+    // }
+
     [Command]
     public void CmdDealCards()
     {
-        if (!cardsDealt)
+        if (!connectionAdded) 
         {
             GameObject scoreManager = Instantiate(ScoreManager, new Vector2(0, 0), Quaternion.identity);
             NetworkServer.Spawn(scoreManager, connectionToClient);
-
             connectionScoreManagers.Add(connectionToClient, scoreManager);
-
-            for (int j = 0; j < 10; j++)
+            connectionAdded = true;
+        }
+        if (!cardsDealt)
+        {
+            //TODO op 10 zetten
+            // for (int j = 0; j < 10; j++)
+            for (int j = 0; j < 3; j++)
             {
                 GameObject card = Instantiate(Card, new Vector2(0, 0), Quaternion.identity);
                 int cardNumber = CardManager.GetCardNumber(card);
@@ -114,6 +169,9 @@ public class PlayerManager : NetworkBehaviour
                 NetworkServer.Spawn(card, connectionToClient);
                 RpcShowCards(card, cardNumber, "dealt", -1);
             }
+            // Debug.Log(cardsDealt);
+            // RpcSetAllClientsCardsDealtsStatus(true);
+            // Debug.Log(cardsDealt);
             cardsDealt = true;
         }
     }
@@ -153,6 +211,11 @@ public class PlayerManager : NetworkBehaviour
                         // Punten
                         CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
 
+                        Debug.Log(card.GetComponent<CardInfo>().connectionToClient);
+                        var value = connectionScoreManagers[card.GetComponent<CardInfo>().connectionToClient];
+                        ScoreManager scoreManager = value.GetComponent<ScoreManager>();
+                        RpcUpdateScore(card.GetComponent<CardInfo>().connectionToClient, scoreManager, score);
+
                         RpcDestroyCardsInRow($"Row{lowestDiffIndex + 1}");
                     }
                     CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().AddCardToRow(card);
@@ -190,8 +253,29 @@ public class PlayerManager : NetworkBehaviour
                     RpcPlaceCards(obj, $"Row{i + 1}", obj.GetComponent<CardInfo>().CardNumber);
                 }
             }
-            CardManager.CardsPlayedThisRound.Clear();
+            totalHandsPlayed++;
         }
+    }
+
+    // [Command]
+    // void CmdDealRowCards() {
+    //     if (!RowCardsDealt.RowCardsAreDealt)
+    //     {
+    //         DealRowCards();
+    //         RowCardsDealt.RowCardsAreDealt = true;
+    //     }
+
+    //     CmdGetRowCards();
+    //     totalHandsPlayed = 0;
+    // }
+
+    [ClientRpc]
+    void RpcSetAllClientsCardsDealtsStatus(bool status) {
+        Debug.Log("test");
+        Debug.Log(cardsDealt); //false
+        cardsDealt = status;
+        Debug.Log(cardsDealt); //true   
+
     }
 
     [TargetRpc]
@@ -217,6 +301,18 @@ public class PlayerManager : NetworkBehaviour
         for (int i = 0; i < row.transform.childCount;i++)
         {
             Destroy(row.transform.GetChild(i).gameObject);
+        }
+    }
+
+    [ClientRpc]
+    void RpcDestroyCardsInAllRows()
+    {
+        for(int i = 1; i < 5; i++) {
+            GameObject row = GameObject.Find($"Row{i}");
+            for (int j = 0; j < row.transform.childCount; j++)
+            {
+                Destroy(row.transform.GetChild(j).gameObject);
+            }
         }
     }
 
