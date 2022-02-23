@@ -121,11 +121,10 @@ public class PlayerManager : NetworkBehaviour
         if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers)
         {
             CardManager.CardsPlayedThisRound.OrderByDescending(Card => Card.GetComponent<CardInfo>().CardNumber);
-
-            for (int i = 0; i < CardManager.CardsPlayedThisRound.Count; i++)
-
+            while(CardManager.CardsPlayedThisRound.Count > 0)
             {
-                card = CardManager.CardsPlayedThisRound[i];
+                card = CardManager.CardsPlayedThisRound[0];
+                CardManager.CardsPlayedThisRound.Remove(card);
                 int lowestDiff = 999999999;
                 int lowestDiffIndex = -1;
                 for (int j = 0; j < CardManager.Rows.Count; j++)
