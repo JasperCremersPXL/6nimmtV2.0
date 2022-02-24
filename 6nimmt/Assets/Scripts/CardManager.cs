@@ -35,7 +35,6 @@ public class CardManager : MonoBehaviour
     
     public void SortCards() {
         CardsPlayedThisRound = CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber).ToList();
-
         bool sort = false;
         for(int i = 0; i < CardsPlayedThisRound.Count - 1; i++) {
             if (CardsPlayedThisRound[i].GetComponent<CardInfo>().CardNumber > CardsPlayedThisRound[i + 1].GetComponent<CardInfo>().CardNumber) {
@@ -43,12 +42,8 @@ public class CardManager : MonoBehaviour
                 break;
             }
         }
-        Debug.Log("sort value");
-        Debug.Log(sort);
-        if (sort) CardsPlayedThisRound = CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber).ToList();
-        
-        foreach(GameObject card in CardsPlayedThisRound) {
-            Debug.Log(card.GetComponent<CardInfo>().CardNumber);
+        if (sort) {
+            CardsPlayedThisRound = CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber).ToList();
         }
     }
     public int GetCardNumber(GameObject card) 

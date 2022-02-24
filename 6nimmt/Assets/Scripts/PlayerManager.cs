@@ -36,35 +36,26 @@ public class PlayerManager : NetworkBehaviour
 
     [Server]
     void Update() {
-        //  if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers && !cardsAreSorted) {
-        //     CardManager.CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber);
-        //     cardsAreSorted = true;
-        //  }
-        // Debug.Log(CardManager.CardsPlayedThisRound.Count);
-        // TODO op 10 zetten
+        // TODO op 10 zetten!!!
         if (!gameOver) {
             if (totalHandsPlayed == 10) {
                 var values = connectionScoreManagers.Values;
                 foreach(GameObject score in values) {
-                    if (score.GetComponent<ScoreManager>().Score >= 5) {
+                    Debug.Log($"Endscore: {score.GetComponent<ScoreManager>().Score}");
+                    // TODO op 66 zetten!!!
+                    if (score.GetComponent<ScoreManager>().Score >= 66) {
                         Debug.Log("LOSER");
                         gameOver = true;
                         return;
                     }
                 }
-
                 var players = FindObjectsOfType<PlayerManager>(); 
                 foreach(PlayerManager player in players) {
                     player.cardsDealt = false;
                 }
-
-                // cardsDealt = false;
                 RowCardsDealt.RowCardsAreDealt = false;
-
                 RpcDestroyCardsInAllRows();
-
                 CardManager.ResetRound();
-
                 if (!RowCardsDealt.RowCardsAreDealt)
                 {
                     DealRowCards();
@@ -82,7 +73,6 @@ public class PlayerManager : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-
         PlayerArea = GameObject.Find("PlayerArea");
         Row1 = GameObject.Find("Row1");
         Row2 = GameObject.Find("Row2");
@@ -93,7 +83,6 @@ public class PlayerManager : NetworkBehaviour
         Rows.Add(Row2);
         Rows.Add(Row3);
         Rows.Add(Row4);
-
         DropZone = GameObject.Find("DropZone");
         PlayedCards = GameObject.Find("PlayedCards");
         CardsInHand = new List<GameObject>();
@@ -102,9 +91,7 @@ public class PlayerManager : NetworkBehaviour
             CmdGetRowCards();
         }
         numberOfPlayers++;
-
         clients.Add(connectionToClient);
-
         ScoreText = GameObject.Find("ScoreText").GetComponent<Text>();
         ScoreText.text = $"Score: 0";
     }
@@ -113,7 +100,6 @@ public class PlayerManager : NetworkBehaviour
     public override void OnStartServer()
     {
         base.OnStartServer();
-        //CardManager = Instantiate(CardManagerPrefab, new Vector2(0, 0), Quaternion.identity);
         CardManager = GameObject.Find("CardManager").GetComponent<CardManager>();
         CardManager.InstantiateRows();
         if (!RowCardsDealt.RowCardsAreDealt)
@@ -137,7 +123,6 @@ public class PlayerManager : NetworkBehaviour
     [Command]
     public void CmdGetRowCards()
     {
-        // Debug.Log(CardManager.Rows.Count);
         for (int i = 0; i < CardManager.Rows.Count; i++)
         {
             foreach (var card in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
@@ -146,19 +131,6 @@ public class PlayerManager : NetworkBehaviour
             }
         }
     }
-
-    // [Command(requiresAuthority = false)]
-    // public void CmdGetRowCardsWithoutAuthority()
-    // {
-    //     Debug.Log(CardManager.Rows.Count);
-    //     for (int i = 0; i < CardManager.Rows.Count; i++)
-    //     {
-    //         foreach (var card in CardManager.Rows[i].GetComponent<RowManager>().CardsInRow)
-    //         {
-    //             RpcShowCards(card, card.GetComponent<CardInfo>().CardNumber, "dealt", i);
-    //         }
-    //     }
-    // }
 
     [Command]
     public void CmdDealCards()
@@ -172,9 +144,9 @@ public class PlayerManager : NetworkBehaviour
         }
         if (!cardsDealt)
         {
-            //TODO op 10 zetten
+            //TODO op 10 zetten!!!
             for (int j = 0; j < 10; j++)
-            // for (int j = 0; j < 3; j++)
+            // for (int j = 0; j < 1; j++)
             {
                 GameObject card = Instantiate(Card, new Vector2(0, 0), Quaternion.identity);
                 int cardNumber = CardManager.GetCardNumber(card);
@@ -182,9 +154,6 @@ public class PlayerManager : NetworkBehaviour
                 NetworkServer.Spawn(card, connectionToClient);
                 RpcShowCards(card, cardNumber, "dealt", -1);
             }
-            // Debug.Log(cardsDealt);
-            // RpcSetAllClientsCardsDealtsStatus(true);
-            // Debug.Log(cardsDealt);
             cardsDealt = true;
         }
     }
@@ -206,7 +175,7 @@ public class PlayerManager : NetworkBehaviour
             {
                 card = CardManager.CardsPlayedThisRound[0];
                 CardManager.CardsPlayedThisRound.Remove(card);
-                int lowestDiff = 999999999;
+                int lowestDiff = 105;
                 int lowestDiffIndex = -1;
                 for (int j = 0; j < CardManager.Rows.Count; j++)
                 {
@@ -222,21 +191,18 @@ public class PlayerManager : NetworkBehaviour
                     if (CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().IsFull)
                     {
                         var score = CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().GetRowScore();
-                        // Punten
                         CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
-
-                        // Debug.Log(card.GetComponent<CardInfo>().connectionToClient);
                         var value = connectionScoreManagers[card.GetComponent<CardInfo>().connectionToClient];
                         ScoreManager scoreManager = value.GetComponent<ScoreManager>();
                         RpcUpdateScore(card.GetComponent<CardInfo>().connectionToClient, scoreManager, score);
-
+                        scoreManager.Score += score;
                         RpcDestroyCardsInRow($"Row{lowestDiffIndex + 1}");
                     }
                     CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().AddCardToRow(card);
                 }
                 else
                 {
-                    int lowestScore = 150;
+                    int lowestScore = 105;
                     int lowestScoreIndex = -1;
 
                     for (int j = 0; j < CardManager.Rows.Count; j++)
@@ -250,13 +216,11 @@ public class PlayerManager : NetworkBehaviour
                         }
                     }
                     Debug.Log($"player ... had to take row {lowestScoreIndex + 1}");
-
                     CardManager.Rows[lowestScoreIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
-
-                    // Debug.Log(card.GetComponent<CardInfo>().connectionToClient);
                     var value = connectionScoreManagers[card.GetComponent<CardInfo>().connectionToClient];
                     ScoreManager scoreManager = value.GetComponent<ScoreManager>();
                     RpcUpdateScore(card.GetComponent<CardInfo>().connectionToClient, scoreManager, lowestScore);
+                    scoreManager.Score += lowestScore;
                     RpcDestroyCardsInRow($"Row{lowestScoreIndex+1}");
                 }
                 WhileCounter++;
@@ -272,29 +236,12 @@ public class PlayerManager : NetworkBehaviour
                 }
             }
             totalHandsPlayed++;
-            // cardsAreSorted = false;
         }    
     }
 
-    // [Command]
-    // void CmdDealRowCards() {
-    //     if (!RowCardsDealt.RowCardsAreDealt)
-    //     {
-    //         DealRowCards();
-    //         RowCardsDealt.RowCardsAreDealt = true;
-    //     }
-
-    //     CmdGetRowCards();
-    //     totalHandsPlayed = 0;
-    // }
-
     [ClientRpc]
     void RpcSetAllClientsCardsDealtsStatus(bool status) {
-        // Debug.Log("test");
-        // Debug.Log(cardsDealt); //false
         cardsDealt = status;
-        // Debug.Log(cardsDealt); //true   
-
     }
 
     [TargetRpc]
