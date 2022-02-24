@@ -2,6 +2,7 @@ using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class CardManager : MonoBehaviour
 {
@@ -29,8 +30,27 @@ public class CardManager : MonoBehaviour
     public void PlayCard(GameObject card) 
     {
         CardsPlayedThisRound.Add(card);
+        SortCards();
     }
+    
+    public void SortCards() {
+        CardsPlayedThisRound = CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber).ToList();
 
+        bool sort = false;
+        for(int i = 0; i < CardsPlayedThisRound.Count - 1; i++) {
+            if (CardsPlayedThisRound[i].GetComponent<CardInfo>().CardNumber > CardsPlayedThisRound[i + 1].GetComponent<CardInfo>().CardNumber) {
+                sort = true;
+                break;
+            }
+        }
+        Debug.Log("sort value");
+        Debug.Log(sort);
+        if (sort) CardsPlayedThisRound = CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber).ToList();
+        
+        foreach(GameObject card in CardsPlayedThisRound) {
+            Debug.Log(card.GetComponent<CardInfo>().CardNumber);
+        }
+    }
     public int GetCardNumber(GameObject card) 
     {
         int cardNumber = Random.Range(1,105);

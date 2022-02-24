@@ -31,6 +31,8 @@ public class PlayerManager : NetworkBehaviour
     private bool gameOver = false;
     private bool connectionAdded = false;
     private bool cardsAreSorted = false;
+    private int EmergencyStop = 0;
+    private int WhileCounter = 0;
 
     [Server]
     void Update() {
@@ -192,21 +194,15 @@ public class PlayerManager : NetworkBehaviour
         CmdPlayCard(card);
     }
 
-    public void SortCards() {
-        CardManager.CardsPlayedThisRound.OrderBy(Card => Card.GetComponent<CardInfo>().CardNumber);
-
-        foreach(GameObject card in CardManager.CardsPlayedThisRound) {
-            Debug.Log(card.GetComponent<CardInfo>().CardNumber);
-        }
-    }
-
     [Command]
     void CmdPlayCard(GameObject card)
     {
-        SortCards();
         CardManager.PlayCard(card);
         if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers) {
-            while(CardManager.CardsPlayedThisRound.Count > 0)
+            Debug.Log(CardManager.CardsPlayedThisRound.Count);
+            EmergencyStop = CardManager.CardsPlayedThisRound.Count;
+            WhileCounter = 0;
+            while(CardManager.CardsPlayedThisRound.Count > 0 && WhileCounter < EmergencyStop)
             {
                 card = CardManager.CardsPlayedThisRound[0];
                 CardManager.CardsPlayedThisRound.Remove(card);
@@ -263,6 +259,10 @@ public class PlayerManager : NetworkBehaviour
                     RpcUpdateScore(card.GetComponent<CardInfo>().connectionToClient, scoreManager, lowestScore);
                     RpcDestroyCardsInRow($"Row{lowestScoreIndex+1}");
                 }
+                WhileCounter++;
+            }
+            if (EmergencyStop > WhileCounter) {
+                Debug.Log("Shit is going down");
             }
             for (int i = 0; i < CardManager.Rows.Count; i++)
             {
