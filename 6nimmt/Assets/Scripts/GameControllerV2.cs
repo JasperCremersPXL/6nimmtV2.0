@@ -272,7 +272,7 @@ namespace Assets.Scripts
         {
             foreach (var player in playerList)
             {
-                if (player.Score > 5)
+                if (player.Score > 66)
                 {
                     return true;
                 }
