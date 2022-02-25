@@ -40,7 +40,7 @@ public class PlayerManager : NetworkBehaviour
                 foreach(GameObject score in values) {
                     Debug.Log($"Endscore: {score.GetComponent<ScoreManager>().Score}");
                     // TODO op 66 zetten!!!
-                    if (score.GetComponent<ScoreManager>().Score >= 1) {
+                    if (score.GetComponent<ScoreManager>().Score >= 66) {
                         _gameOver = true;
                         RpcActivateGameOverPanel();
                         return;
