@@ -1,72 +1,69 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using Mirror;
 
 public class DragDrop : NetworkBehaviour
 {
     public GameObject Canvas;
-    public bool isDraggable = true;
+    public bool IsDraggable = true;
 
-    private bool isDragging = false;
-    private GameObject startParent;
-    private Vector2 startPosition;
-    private GameObject dropZone;
-    private bool isOverDropZone;
+    private bool _isDragging = false;
+    private GameObject _startParent;
+    private Vector2 _startPosition;
+    private GameObject _dropZone;
+    private bool _isOverDropZone;
 
     void Start()
     {
         Canvas = GameObject.Find("Main Canvas");
         if(!hasAuthority) 
         {
-            isDraggable = false;
+            IsDraggable = false;
         }
     }
 
     private void OnCollisionEnter2D(Collision2D collision) 
     {
-        isOverDropZone = true;
-        dropZone = collision.gameObject;
+        _isOverDropZone = true;
+        _dropZone = collision.gameObject;
     }
 
     private void OnCollisionExit2D(Collision2D collision) 
     {
-        isOverDropZone = false;
-        dropZone = null;
+        _isOverDropZone = false;
+        _dropZone = null;
     }
 
     public void BeginDrag() 
     {
-        if(!isDraggable) return;
-        isDragging = true;
-        startParent = transform.parent.gameObject;
-        startPosition = transform.position;
+        if(!IsDraggable) return;
+        _isDragging = true;
+        _startParent = transform.parent.gameObject;
+        _startPosition = transform.position;
         
     }
 
     public void EndDrag() 
     {
-        if(!isDraggable) return;
-        isDragging = false;
-        if(isOverDropZone && dropZone.transform.childCount < 1) 
+        if(!IsDraggable) return;
+        _isDragging = false;
+        if(_isOverDropZone && _dropZone.transform.childCount < 1) 
         {
-            transform.SetParent(dropZone.transform, false);
-            isDraggable = false;
+            transform.SetParent(_dropZone.transform, false);
+            IsDraggable = false;
             NetworkIdentity networkIdentity = NetworkClient.connection.identity;
             PlayerManager PlayerManager = networkIdentity.GetComponent<PlayerManager>();
             PlayerManager.PlayCard(gameObject);
         }
         else 
         {
-            transform.position = startPosition;
-            transform.SetParent(startParent.transform, false);
+            transform.position = _startPosition;
+            transform.SetParent(_startParent.transform, false);
         }
     }
 
     void Update()
     {
-        if(isDragging) 
+        if(_isDragging) 
         {
             transform.position = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
             transform.SetParent(Canvas.transform, true);

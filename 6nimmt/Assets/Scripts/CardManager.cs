@@ -1,18 +1,16 @@
-using Mirror;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
 public class CardManager : MonoBehaviour
 {
-    public static Dictionary<int, GameObject> dealtCards = new Dictionary<int, GameObject>();
+    public static Dictionary<int, GameObject> DealtCards = new Dictionary<int, GameObject>();
     public static List<GameObject> CardsPlayedThisRound = new List<GameObject>();
     public static List<GameObject> Rows;
 
     public void ResetRound()
     {
-        dealtCards.Clear();
+        DealtCards.Clear();
         foreach(var row in Rows) {
             row.GetComponent<RowManager>().CardsInRow = new List<GameObject>();
         }
@@ -49,11 +47,11 @@ public class CardManager : MonoBehaviour
     public int GetCardNumber(GameObject card) 
     {
         int cardNumber = Random.Range(1,105);
-        while(dealtCards.ContainsKey(cardNumber)) 
+        while(DealtCards.ContainsKey(cardNumber)) 
         {
             cardNumber = Random.Range(1,105);
         }
-        dealtCards.Add(cardNumber, card);
+        DealtCards.Add(cardNumber, card);
         card.GetComponent<CardInfo>().CardNumber = cardNumber;
         return cardNumber;
     }

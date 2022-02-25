@@ -1,10 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
-using System.Linq;
 
 public class PlayerManager : NetworkBehaviour
 {
@@ -23,35 +20,33 @@ public class PlayerManager : NetworkBehaviour
     public List<GameObject> Rows;
     public Text ScoreText;
     public GameObject ScoreManager;
-    public bool cardsDealt = false;
-    private static int numberOfPlayers = 0;
-    private static List<NetworkConnection> clients = new List<NetworkConnection>();
-    private static Dictionary<NetworkConnection, GameObject> connectionScoreManagers = new Dictionary<NetworkConnection, GameObject>();
-    private static int totalHandsPlayed;
-    private bool gameOver = false;
-    private bool connectionAdded = false;
-    private bool cardsAreSorted = false;
-    private int EmergencyStop = 0;
-    private int WhileCounter = 0;
+    public bool CardsDealt = false;
+    private static int _numberOfPlayers = 0;
+    private static List<NetworkConnection> _clients = new List<NetworkConnection>();
+    private static Dictionary<NetworkConnection, GameObject> _connectionScoreManagers = new Dictionary<NetworkConnection, GameObject>();
+    private static int _totalHandsPlayed;
+    private bool _gameOver = false;
+    private bool _connectionAdded = false;
+    private int _emergencyStop = 0;
+    private int _whileCounter = 0;
 
     [Server]
     void Update() {
         // TODO op 10 zetten!!!
-        if (!gameOver) {
-            if (totalHandsPlayed == 10) {
-                var values = connectionScoreManagers.Values;
+        if (!_gameOver) {
+            if (_totalHandsPlayed == 10) {
+                var values = _connectionScoreManagers.Values;
                 foreach(GameObject score in values) {
                     Debug.Log($"Endscore: {score.GetComponent<ScoreManager>().Score}");
                     // TODO op 66 zetten!!!
                     if (score.GetComponent<ScoreManager>().Score >= 66) {
-                        Debug.Log("LOSER");
-                        gameOver = true;
+                        _gameOver = true;
                         return;
                     }
                 }
                 var players = FindObjectsOfType<PlayerManager>(); 
                 foreach(PlayerManager player in players) {
-                    player.cardsDealt = false;
+                    player.CardsDealt = false;
                 }
                 RowCardsDealt.RowCardsAreDealt = false;
                 RpcDestroyCardsInAllRows();
@@ -62,14 +57,14 @@ public class PlayerManager : NetworkBehaviour
                     RowCardsDealt.RowCardsAreDealt = true;
                 }
                 CmdGetRowCards();
-                totalHandsPlayed = 0;
+                _totalHandsPlayed = 0;
             }
         } else {
-            Debug.Log("FINALLY");
-        }
-            
+            // TODO GameOver Screen!!!
+       }
     }
 
+    [Client]
     public override void OnStartClient()
     {
         base.OnStartClient();
@@ -90,8 +85,8 @@ public class PlayerManager : NetworkBehaviour
         {
             CmdGetRowCards();
         }
-        numberOfPlayers++;
-        clients.Add(connectionToClient);
+        _numberOfPlayers++;
+        _clients.Add(connectionToClient);
         ScoreText = GameObject.Find("ScoreText").GetComponent<Text>();
         ScoreText.text = $"Score: 0";
     }
@@ -135,14 +130,14 @@ public class PlayerManager : NetworkBehaviour
     [Command]
     public void CmdDealCards()
     {
-        if (!connectionAdded) 
+        if (!_connectionAdded) 
         {
             GameObject scoreManager = Instantiate(ScoreManager, new Vector2(0, 0), Quaternion.identity);
             NetworkServer.Spawn(scoreManager, connectionToClient);
-            connectionScoreManagers.Add(connectionToClient, scoreManager);
-            connectionAdded = true;
+            _connectionScoreManagers.Add(connectionToClient, scoreManager);
+            _connectionAdded = true;
         }
-        if (!cardsDealt)
+        if (!CardsDealt)
         {
             //TODO op 10 zetten!!!
             for (int j = 0; j < 10; j++)
@@ -150,11 +145,11 @@ public class PlayerManager : NetworkBehaviour
             {
                 GameObject card = Instantiate(Card, new Vector2(0, 0), Quaternion.identity);
                 int cardNumber = CardManager.GetCardNumber(card);
-                card.GetComponent<CardInfo>().connectionToClient = connectionToClient;
+                card.GetComponent<CardInfo>().ConnectionToClient = connectionToClient;
                 NetworkServer.Spawn(card, connectionToClient);
                 RpcShowCards(card, cardNumber, "dealt", -1);
             }
-            cardsDealt = true;
+            CardsDealt = true;
         }
     }
 
@@ -167,11 +162,11 @@ public class PlayerManager : NetworkBehaviour
     void CmdPlayCard(GameObject card)
     {
         CardManager.PlayCard(card);
-        if (CardManager.CardsPlayedThisRound.Count >= numberOfPlayers) {
-            Debug.Log(CardManager.CardsPlayedThisRound.Count);
-            EmergencyStop = CardManager.CardsPlayedThisRound.Count;
-            WhileCounter = 0;
-            while(CardManager.CardsPlayedThisRound.Count > 0 && WhileCounter < EmergencyStop)
+        if (CardManager.CardsPlayedThisRound.Count >= _numberOfPlayers) {
+            // Debug.Log(CardManager.CardsPlayedThisRound.Count);
+            _emergencyStop = CardManager.CardsPlayedThisRound.Count;
+            _whileCounter = 0;
+            while(CardManager.CardsPlayedThisRound.Count > 0 && _whileCounter < _emergencyStop)
             {
                 card = CardManager.CardsPlayedThisRound[0];
                 CardManager.CardsPlayedThisRound.Remove(card);
@@ -192,9 +187,9 @@ public class PlayerManager : NetworkBehaviour
                     {
                         var score = CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().GetRowScore();
                         CardManager.Rows[lowestDiffIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
-                        var value = connectionScoreManagers[card.GetComponent<CardInfo>().connectionToClient];
+                        var value = _connectionScoreManagers[card.GetComponent<CardInfo>().ConnectionToClient];
                         ScoreManager scoreManager = value.GetComponent<ScoreManager>();
-                        RpcUpdateScore(card.GetComponent<CardInfo>().connectionToClient, scoreManager, score);
+                        RpcUpdateScore(card.GetComponent<CardInfo>().ConnectionToClient, scoreManager, score);
                         scoreManager.Score += score;
                         RpcDestroyCardsInRow($"Row{lowestDiffIndex + 1}");
                     }
@@ -215,18 +210,21 @@ public class PlayerManager : NetworkBehaviour
                             lowestScoreIndex = j;
                         }
                     }
-                    Debug.Log($"player ... had to take row {lowestScoreIndex + 1}");
+                    var key = card.GetComponent<CardInfo>().ConnectionToClient;
+                    Debug.Log($"player {key} had to take row {lowestScoreIndex + 1}");
                     CardManager.Rows[lowestScoreIndex].GetComponent<RowManager>().ClearRowAndAddCard(card);
-                    var value = connectionScoreManagers[card.GetComponent<CardInfo>().connectionToClient];
+                    var value = _connectionScoreManagers[key];
                     ScoreManager scoreManager = value.GetComponent<ScoreManager>();
-                    RpcUpdateScore(card.GetComponent<CardInfo>().connectionToClient, scoreManager, lowestScore);
+                    RpcUpdateScore(key, scoreManager, lowestScore);
                     scoreManager.Score += lowestScore;
                     RpcDestroyCardsInRow($"Row{lowestScoreIndex+1}");
                 }
-                WhileCounter++;
+                _whileCounter++;
             }
-            if (EmergencyStop > WhileCounter) {
-                Debug.Log("Shit is going down");
+            if (_emergencyStop > _whileCounter) {
+                // Fail safe voor de bug dat er een kaart blijft liggen in de dropzone van een speler en het spel onspeelbaar wordt
+                // Bug kan al opgelost zijn... We don't know ¯\_(ツ)_/¯
+                Debug.Log("Emergency stop triggered!!!");
             }
             for (int i = 0; i < CardManager.Rows.Count; i++)
             {
@@ -235,13 +233,13 @@ public class PlayerManager : NetworkBehaviour
                     RpcPlaceCards(obj, $"Row{i + 1}", obj.GetComponent<CardInfo>().CardNumber);
                 }
             }
-            totalHandsPlayed++;
+            _totalHandsPlayed++;
         }    
     }
 
     [ClientRpc]
     void RpcSetAllClientsCardsDealtsStatus(bool status) {
-        cardsDealt = status;
+        CardsDealt = status;
     }
 
     [TargetRpc]
@@ -257,7 +255,7 @@ public class PlayerManager : NetworkBehaviour
         GameObject row = GameObject.Find(rowId);
         card.transform.SetParent(row.transform, false);
         card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
-        card.GetComponent<DragDrop>().isDraggable = false;
+        card.GetComponent<DragDrop>().IsDraggable = false;
     }
 
     [ClientRpc]
@@ -301,14 +299,14 @@ public class PlayerManager : NetworkBehaviour
                 GameObject row = Rows[rowIndex];
                 card.transform.SetParent(row.transform, false);
                 card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
-                card.GetComponent<DragDrop>().isDraggable = false;
+                card.GetComponent<DragDrop>().IsDraggable = false;
             }
         }
         else if (type == "played")
         {
             card.transform.SetParent(Rows[rowIndex].transform, false);
             card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Textures/{cardNumber}");
-            card.GetComponent<DragDrop>().isDraggable = false;
+            card.GetComponent<DragDrop>().IsDraggable = false;
         }
     }
 
@@ -319,7 +317,7 @@ public class PlayerManager : NetworkBehaviour
         {
             foreach (GameObject card in CardsInHand)
             {
-                card.GetComponent<DragDrop>().isDraggable = false;
+                card.GetComponent<DragDrop>().IsDraggable = false;
             }
         }
     }

@@ -6,7 +6,7 @@ using Mirror;
 public class CardInfo : MonoBehaviour
 {
     public int CardNumber;
-    public NetworkConnection connectionToClient;
+    public NetworkConnection ConnectionToClient;
 
     public static int CalculateCardTriangles(int i)
     {
