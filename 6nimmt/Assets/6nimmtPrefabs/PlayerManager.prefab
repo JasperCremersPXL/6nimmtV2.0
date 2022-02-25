@@ -114,4 +114,4 @@ MonoBehaviour:
   ScoreText: {fileID: 0}
   ScoreManager: {fileID: 7969175047727477255, guid: 7cc126ad9049a4b4f8ae78662a881ae0, type: 3}
   CardsDealt: 0
-  GameOverPanel: {fileID: 0}
+  GameOverPanel: {fileID: 8965542677953058898, guid: 79c11a9ccae380696a53eab4749ca299, type: 3}

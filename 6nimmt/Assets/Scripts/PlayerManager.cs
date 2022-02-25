@@ -42,6 +42,7 @@ public class PlayerManager : NetworkBehaviour
                     // TODO op 66 zetten!!!
                     if (score.GetComponent<ScoreManager>().Score >= 1) {
                         _gameOver = true;
+                        RpcActivateGameOverPanel();
                         return;
                     }
                 }
@@ -60,10 +61,7 @@ public class PlayerManager : NetworkBehaviour
                 CmdGetRowCards();
                 _totalHandsPlayed = 0;
             }
-        } else {
-            GameOverPanel.SetActive(true);
-            RpcActivateGameOverPanel(GameOverPanel);
-       }
+        } 
     }
 
     [Client]
@@ -91,7 +89,7 @@ public class PlayerManager : NetworkBehaviour
         _clients.Add(connectionToClient);
         ScoreText = GameObject.Find("ScoreText").GetComponent<Text>();
         ScoreText.text = $"Score: 0";
-        GameOverPanel.SetActive(false);
+        
     }
 
     [Server]
@@ -326,7 +324,16 @@ public class PlayerManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    void RpcActivateGameOverPanel(GameObject panel) {
-        panel.SetActive(true);
+    void RpcActivateGameOverPanel() {
+        //GameOverPanel.SetActive(true);
+        GameObject mainCanvas = GameObject.Find("Main Canvas");
+        GameObject gameOverPanel = Instantiate(GameOverPanel);
+        gameOverPanel.transform.SetParent(mainCanvas.transform);
+        RectTransform gameOverPanelRectTransform = gameOverPanel.GetComponent<RectTransform>();
+        gameOverPanelRectTransform.anchorMin = Vector2.zero;
+        gameOverPanelRectTransform.anchorMax = new Vector2(1,1);
+        gameOverPanelRectTransform.offsetMin = Vector2.zero;
+        gameOverPanelRectTransform.offsetMax = Vector2.zero;
+
     }
 }
