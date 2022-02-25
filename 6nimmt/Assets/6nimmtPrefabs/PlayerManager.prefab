@@ -113,3 +113,5 @@ MonoBehaviour:
   Rows: []
   ScoreText: {fileID: 0}
   ScoreManager: {fileID: 7969175047727477255, guid: 7cc126ad9049a4b4f8ae78662a881ae0, type: 3}
+  CardsDealt: 0
+  GameOverPanel: {fileID: 0}

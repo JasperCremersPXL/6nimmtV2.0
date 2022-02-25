@@ -21,6 +21,7 @@ public class PlayerManager : NetworkBehaviour
     public Text ScoreText;
     public GameObject ScoreManager;
     public bool CardsDealt = false;
+    public GameObject GameOverPanel;
     private static int _numberOfPlayers = 0;
     private static List<NetworkConnection> _clients = new List<NetworkConnection>();
     private static Dictionary<NetworkConnection, GameObject> _connectionScoreManagers = new Dictionary<NetworkConnection, GameObject>();
@@ -39,7 +40,7 @@ public class PlayerManager : NetworkBehaviour
                 foreach(GameObject score in values) {
                     Debug.Log($"Endscore: {score.GetComponent<ScoreManager>().Score}");
                     // TODO op 66 zetten!!!
-                    if (score.GetComponent<ScoreManager>().Score >= 66) {
+                    if (score.GetComponent<ScoreManager>().Score >= 1) {
                         _gameOver = true;
                         return;
                     }
@@ -60,7 +61,8 @@ public class PlayerManager : NetworkBehaviour
                 _totalHandsPlayed = 0;
             }
         } else {
-            // TODO GameOver Screen!!!
+            GameOverPanel.SetActive(true);
+            RpcActivateGameOverPanel(GameOverPanel);
        }
     }
 
@@ -89,6 +91,7 @@ public class PlayerManager : NetworkBehaviour
         _clients.Add(connectionToClient);
         ScoreText = GameObject.Find("ScoreText").GetComponent<Text>();
         ScoreText.text = $"Score: 0";
+        GameOverPanel.SetActive(false);
     }
 
     [Server]
@@ -320,5 +323,10 @@ public class PlayerManager : NetworkBehaviour
                 card.GetComponent<DragDrop>().IsDraggable = false;
             }
         }
+    }
+
+    [ClientRpc]
+    void RpcActivateGameOverPanel(GameObject panel) {
+        panel.SetActive(true);
     }
 }
